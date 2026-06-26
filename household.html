@@ -362,6 +362,26 @@ h3 {
   font-weight: 900;
 }
 
+.discount-chip {
+  min-width: 0;
+  margin-top: 5px;
+  overflow: hidden;
+  color: #9a4b30;
+  font-size: 0.66rem;
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.discount-record {
+  border-color: #ffd6cc;
+  background: #fff8f4;
+}
+
+.discount-record .expense-amount {
+  color: #9a4b30;
+}
+
 .category-dots {
   display: flex;
   flex-wrap: wrap;
@@ -972,8 +992,8 @@ h3 {
   .app-shell {
     width: min(370px, calc(100vw - 20px));
     max-width: 370px;
-    margin-right: 10px;
-    margin-left: 10px;
+    margin-right: auto;
+    margin-left: auto;
     padding-top: 10px;
   }
 
@@ -1445,6 +1465,9 @@ const incomeCategories = [
   { id: "salary", label: "給与", color: "#74b66d" }
 ];
 
+const SESSION_KEY = "kaimono-clock-session-v2";
+const DISCOUNT_CACHE_KEY_PREFIX = "kaimono-clock-discount-cache-v2";
+
 const yen = new Intl.NumberFormat("ja-JP", {
   style: "currency",
   currency: "JPY",
@@ -1457,6 +1480,7 @@ const state = {
   selectedDate: null,
   expenses: loadJson("monthMateExpenses", []),
   incomes: loadJson("monthMateIncomes", []),
+  discounts: [],
   monthlyBudgets: loadJson("monthMateMonthlyBudgets", {}),
   categoryBudgets: normalizeCategoryBudgets(loadJson("monthMateCategoryBudgets", {})),
   activeView: new URLSearchParams(location.search).get("view") === "report" ? "reportView" : "calendarView"
@@ -1540,6 +1564,27 @@ function loadJson(key, fallback) {
     return JSON.parse(localStorage.getItem(key)) || fallback;
   } catch {
     return fallback;
+  }
+}
+
+function currentUserId() {
+  try {
+    return JSON.parse(localStorage.getItem(SESSION_KEY) || "null")?.user?.id || "";
+  } catch {
+    return "";
+  }
+}
+
+function loadDiscountCache() {
+  const userId = currentUserId();
+  if (!userId) return [];
+  try {
+    const notes = JSON.parse(localStorage.getItem(`${DISCOUNT_CACHE_KEY_PREFIX}:${userId}`) || "{}");
+    return Object.entries(notes || {}).flatMap(([storeId, items]) => {
+      return (Array.isArray(items) ? items : []).map((item) => ({ ...item, storeId }));
+    });
+  } catch {
+    return [];
   }
 }
 
@@ -1711,6 +1756,7 @@ function setView(viewId, updateHash = true) {
 }
 
 function render() {
+  state.discounts = loadDiscountCache();
   els.budget.value = currentBudget();
   renderCalendar();
   renderTotals();
@@ -1741,8 +1787,12 @@ function renderCalendar() {
     const dateKey = toDateInput(new Date(year, month, day));
     const dayExpenses = expensesForDate(dateKey);
     const dayIncomes = incomesForDate(dateKey);
+    const dayDiscounts = discountsForDate(dateKey);
     const total = sum(dayExpenses);
     const income = sum(dayIncomes);
+    const discountLabel = dayDiscounts.length
+      ? `買い時 ${dayDiscounts[0].name}${dayDiscounts.length > 1 ? ` +${dayDiscounts.length - 1}` : ""}`
+      : "";
     const cell = document.createElement("button");
     cell.type = "button";
     cell.className = "day-cell";
@@ -1752,6 +1802,7 @@ function renderCalendar() {
     cell.innerHTML = `
       <span class="day-number">${day}</span>
       <span class="category-dots">${categoryDots(dayExpenses)}${income > 0 ? '<span class="dot income-dot"></span>' : ""}</span>
+      <span class="discount-chip">${escapeHtml(discountLabel)}</span>
       <span class="day-total">${total > 0 ? yen.format(total) : ""}</span>
       <span class="day-income">${income > 0 ? `+${yen.format(income)}` : ""}</span>
     `;
@@ -1855,7 +1906,8 @@ function renderModalDayList() {
   if (!state.selectedDate) return;
   const dayExpenses = expensesForDate(state.selectedDate).map((item) => ({ ...item, type: "expense" }));
   const dayIncomes = incomesForDate(state.selectedDate).map((item) => ({ ...item, type: "income" }));
-  const items = [...dayExpenses, ...dayIncomes].sort((a, b) => b.id.localeCompare(a.id));
+  const dayDiscounts = discountsForDate(state.selectedDate).map((item) => ({ ...item, type: "discount" }));
+  const items = [...dayDiscounts, ...dayExpenses, ...dayIncomes].sort((a, b) => String(b.id).localeCompare(String(a.id)));
   els.modalDayList.innerHTML = "";
 
   if (items.length === 0) {
@@ -1866,11 +1918,29 @@ function renderModalDayList() {
   }
 
   items.forEach((item) => {
+    if (item.type === "discount") {
+      els.modalDayList.append(createDiscountRow(item));
+      return;
+    }
     const category = item.type === "income"
       ? incomeCategories.find((categoryItem) => categoryItem.id === item.category) || incomeCategories[0]
       : categories.find((categoryItem) => categoryItem.id === item.category) || categories.at(-1);
     els.modalDayList.append(createRecordRow(item, category, item.type, true));
   });
+}
+
+function createDiscountRow(item) {
+  const row = document.createElement("article");
+  row.className = "expense-item compact-record discount-record";
+  row.innerHTML = `
+    <span class="date-pill">買い時</span>
+    <div class="expense-main">
+      <strong>${escapeHtml(item.name || "商品名なし")}</strong>
+      <span class="category-pill" style="background:#ff7a59">${escapeHtml(item.storeName || "店舗名なし")}</span>
+    </div>
+    <strong class="expense-amount">${yen.format(Number(item.price || 0))}</strong>
+  `;
+  return row;
 }
 
 function createRecordRow(item, category, type, compact = false) {
@@ -2027,6 +2097,19 @@ function expensesForDate(dateKey) {
 
 function incomesForDate(dateKey) {
   return state.incomes.filter((income) => income.date === dateKey);
+}
+
+function discountsForDate(dateKey) {
+  const date = dateFromInput(dateKey);
+  return state.discounts.filter((discount) => {
+    if (discount.saleMode === "weekly") {
+      return Number(discount.saleWeekday) === date.getDay();
+    }
+    if (discount.saleMode === "monthly") {
+      return Number(discount.saleMonthDay) === date.getDate();
+    }
+    return discount.saleDate === dateKey;
+  });
 }
 
 function sum(items) {

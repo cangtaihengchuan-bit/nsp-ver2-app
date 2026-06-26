@@ -1173,6 +1173,7 @@
       const SUPABASE_TABLE = "nsp_user_discounts";
       const SESSION_KEY = "kaimono-clock-session-v2";
       const LOCATION_KEY_PREFIX = "kaimono-clock-locations-v2";
+      const DISCOUNT_CACHE_KEY_PREFIX = "kaimono-clock-discount-cache-v2";
 
       const state = {
         stores: [],
@@ -1280,6 +1281,15 @@
 
       function locationStorageKey() {
         return `${LOCATION_KEY_PREFIX}:${state.user?.id || "guest"}`;
+      }
+
+      function discountCacheKey() {
+        return `${DISCOUNT_CACHE_KEY_PREFIX}:${state.user?.id || "guest"}`;
+      }
+
+      function saveDiscountCache() {
+        if (!hasSession()) return;
+        localStorage.setItem(discountCacheKey(), JSON.stringify(state.notes));
       }
 
       function loadSavedLocations() {
@@ -1467,6 +1477,7 @@
         }
         const rows = await supabaseRequest(`${SUPABASE_TABLE}?select=*&order=created_at.desc`);
         state.notes = groupRows(rows || []);
+        saveDiscountCache();
         setStatus("ready", "Supabaseから保存済みの割引情報を読み込みました。");
       }
 
@@ -1485,6 +1496,7 @@
             body: JSON.stringify(rows),
           });
           state.notes = backup;
+          saveDiscountCache();
           setStatus("ready", "ローカルJSONの既存データをSupabaseへ移行しました。");
         } catch {
           setStatus("error", "Supabaseへの初回移行に失敗しました。テーブル作成SQLを確認してください。");
@@ -1728,6 +1740,7 @@
             const allNotes = loadNotes();
             allNotes[store.id] = notesFor(store.id).filter((item) => item.id !== note.id);
             state.notes = allNotes;
+            saveDiscountCache();
             render();
             try {
               await deleteNoteFromSupabase(note.id);
@@ -2015,6 +2028,7 @@
           ...(allNotes[store.id] || []),
         ];
         state.notes = allNotes;
+        saveDiscountCache();
         elements.itemForm.reset();
         syncScheduleFields();
         render();
@@ -2032,6 +2046,7 @@
           return;
         }
         state.notes = {};
+        saveDiscountCache();
         render();
         try {
           await clearNotesFromSupabase();

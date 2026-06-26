@@ -3,20 +3,146 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta http-equiv="refresh" content="0; url=./app.html" />
-    <title>Kaimono Clock 体験</title>
+    <title>Kaimono Clock 体験トップ</title>
     <style>
-      body { margin: 0; min-height: 100vh; display: grid; place-items: center; color: #12201f; font-family: "Segoe UI", "Yu Gothic UI", Meiryo, sans-serif; background: #f5fbf8; }
-      main { width: min(420px, calc(100% - 32px)); display: grid; gap: 12px; }
-      a { min-height: 46px; display: grid; place-items: center; border-radius: 8px; color: #fff; background: #142c2c; font-weight: 900; text-decoration: none; }
-      a.secondary { color: #142c2c; background: #fff; border: 1px solid #dce6e4; }
+      :root {
+        --ink: #12201f;
+        --muted: #5f6f6b;
+        --line: #dce6e4;
+        --mint: #1f8f8b;
+        --mint-dark: #142c2c;
+        --coral: #ff7a59;
+        --paper: #fffdf7;
+        --shadow: 0 18px 36px rgba(18, 32, 31, 0.14);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        color: var(--ink);
+        font-family: "Segoe UI", "Yu Gothic UI", "Hiragino Sans", Meiryo, sans-serif;
+        background:
+          radial-gradient(circle at 18% 12%, rgba(255, 122, 89, 0.16), transparent 24rem),
+          radial-gradient(circle at 88% 8%, rgba(114, 183, 242, 0.18), transparent 22rem),
+          linear-gradient(180deg, #fff8df 0%, #f3fbf8 52%, #fffdf7 100%);
+      }
+
+      main {
+        width: min(760px, calc(100% - 28px));
+        display: grid;
+        gap: 18px;
+        padding: 24px;
+        border: 1px solid rgba(220, 230, 228, 0.95);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.92);
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(14px);
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-weight: 900;
+      }
+
+      .logo {
+        display: grid;
+        width: 48px;
+        height: 48px;
+        place-items: center;
+        border-radius: 8px;
+        color: #fff;
+        background: linear-gradient(140deg, var(--mint), var(--coral));
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(2rem, 7vw, 4.2rem);
+        line-height: 1.05;
+        letter-spacing: 0;
+      }
+
+      p {
+        max-width: 620px;
+        margin: 0;
+        color: var(--muted);
+        font-weight: 800;
+        line-height: 1.8;
+      }
+
+      .actions {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      a {
+        min-height: 78px;
+        display: grid;
+        align-content: center;
+        gap: 4px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 14px;
+        color: var(--ink);
+        background: var(--paper);
+        font-weight: 900;
+        text-decoration: none;
+      }
+
+      a.primary {
+        color: #fff;
+        border-color: transparent;
+        background: var(--mint-dark);
+      }
+
+      a span {
+        color: inherit;
+        opacity: 0.78;
+        font-size: 0.86rem;
+      }
+
+      @media (max-width: 640px) {
+        main {
+          width: min(390px, calc(100% - 20px));
+          margin-inline: auto;
+          padding: 18px;
+        }
+
+        .actions {
+          grid-template-columns: 1fr;
+        }
+      }
     </style>
   </head>
   <body>
     <main aria-label="Kaimono Clock 体験トップ">
-      <h1>Kaimono Clock 体験</h1>
-      <a href="./app.html">買い時メモを開く</a>
-      <a class="secondary" href="./household.html">家計簿を開く</a>
+      <div class="brand">
+        <span class="logo">K</span>
+        <strong>Kaimono Clock</strong>
+      </div>
+      <h1>買い時と家計を、ひとつの体験で。</h1>
+      <p>
+        近くのお店の割引メモを保存し、同じ情報を家計簿カレンダーでも確認できます。
+        まずは買い時メモか、家計簿体験を選んでください。
+      </p>
+      <div class="actions">
+        <a class="primary" href="./app.html">
+          買い時メモを開く
+          <span>お店別の割引情報を登録</span>
+        </a>
+        <a href="./household.html">
+          家計簿を開く
+          <span>支出と買い時をカレンダーで確認</span>
+        </a>
+      </div>
     </main>
   </body>
 </html>
