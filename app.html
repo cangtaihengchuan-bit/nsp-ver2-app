@@ -1783,6 +1783,7 @@
                       <option value="once">単発</option>
                       <option value="weekly">毎週</option>
                       <option value="monthly">毎月</option>
+                      <option value="range">期間割引</option>
                     </select>
                   </label>
                   <label id="saleDateWrap" class="schedule-label" for="saleDate">
@@ -1791,7 +1792,7 @@
                   </label>
                   <label id="saleWeekdayWrap" class="schedule-label hidden" for="saleWeekday">
                     <span>曜日</span>
-                    <select id="saleWeekday" class="schedule-field">
+                    <select id="saleWeekday" class="schedule-field" multiple size="4">
                       <option value="0">日曜日</option>
                       <option value="1">月曜日</option>
                       <option value="2">火曜日</option>
@@ -1803,7 +1804,11 @@
                   </label>
                   <label id="saleMonthDayWrap" class="schedule-label hidden" for="saleMonthDay">
                     <span>日にち</span>
-                    <input id="saleMonthDay" class="schedule-field" type="number" min="1" max="31" step="1" placeholder="例: 15" />
+                    <input id="saleMonthDay" class="schedule-field" type="text" inputmode="numeric" placeholder="例: 10,20,30" />
+                  </label>
+                  <label id="saleEndDateWrap" class="schedule-label hidden" for="saleEndDate">
+                    <span>終了日</span>
+                    <input id="saleEndDate" class="schedule-field" type="date" />
                   </label>
                 </div>
               </fieldset>
@@ -1957,6 +1962,8 @@
         saleWeekday: document.querySelector("#saleWeekday"),
         saleMonthDayWrap: document.querySelector("#saleMonthDayWrap"),
         saleMonthDay: document.querySelector("#saleMonthDay"),
+        saleEndDateWrap: document.querySelector("#saleEndDateWrap"),
+        saleEndDate: document.querySelector("#saleEndDate"),
         itemNote: document.querySelector("#itemNote"),
         notes: document.querySelector("#notes"),
         authPanel: document.querySelector("#authPanel"),
@@ -2239,8 +2246,11 @@
           price: Number(row.price),
           saleMode: row.sale_mode || "once",
           saleDate: row.sale_date || "",
+          saleEndDate: row.sale_end_date || "",
           saleWeekday: row.sale_weekday == null ? "0" : String(row.sale_weekday),
+          saleWeekdays: row.sale_weekdays || (row.sale_weekday == null ? "" : String(row.sale_weekday)),
           saleMonthDay: row.sale_month_day == null ? "" : String(row.sale_month_day),
+          saleMonthDays: row.sale_month_days || (row.sale_month_day == null ? "" : String(row.sale_month_day)),
           note: row.note || "",
           createdAt: row.created_at ? new Date(row.created_at).toLocaleDateString("ja-JP") : "",
         };
@@ -2258,9 +2268,12 @@
           item_name: note.name,
           price: note.price,
           sale_mode: note.saleMode || "once",
-          sale_date: note.saleMode === "once" && note.saleDate ? note.saleDate : null,
-          sale_weekday: note.saleMode === "weekly" ? Number(note.saleWeekday) : null,
-          sale_month_day: note.saleMode === "monthly" ? Number(note.saleMonthDay) : null,
+          sale_date: ["once", "range"].includes(note.saleMode) && note.saleDate ? note.saleDate : null,
+          sale_end_date: note.saleMode === "range" && note.saleEndDate ? note.saleEndDate : null,
+          sale_weekday: note.saleMode === "weekly" ? Number(String(note.saleWeekdays || note.saleWeekday || "").split(",")[0]) : null,
+          sale_weekdays: note.saleMode === "weekly" ? normalizeCsvNumbers(note.saleWeekdays || note.saleWeekday, 0, 6).join(",") : null,
+          sale_month_day: note.saleMode === "monthly" ? Number(String(note.saleMonthDays || note.saleMonthDay || "").split(",")[0]) : null,
+          sale_month_days: note.saleMode === "monthly" ? normalizeCsvNumbers(note.saleMonthDays || note.saleMonthDay, 1, 31).join(",") : null,
           note: note.note || null,
         };
       }
@@ -2269,6 +2282,9 @@
         const row = noteToRow(storeId, note);
         delete row.store_label;
         delete row.origin_label;
+        delete row.sale_weekdays;
+        delete row.sale_month_days;
+        delete row.sale_end_date;
         return row;
       }
 
@@ -2328,7 +2344,9 @@
           });
           return true;
         } catch (error) {
-          if (!String(error.message || "").includes("store_label")) throw error;
+          const message = String(error.message || "");
+          const canFallback = ["store_label", "sale_weekdays", "sale_month_days", "sale_end_date"].some((column) => message.includes(column));
+          if (!canFallback) throw error;
           await supabaseRequest(SUPABASE_TABLE, {
             method: "POST",
             headers: { Prefer: "return=minimal" },
@@ -2372,9 +2390,9 @@
         return date;
       }
 
-      function isExpiredOneTimeNote(note) {
-        if ((note.saleMode || "once") !== "once") return false;
-        const saleDate = parseDateOnly(note.saleDate);
+      function isExpiredDiscountNote(note) {
+        if (!["once", "range"].includes(note.saleMode || "once")) return false;
+        const saleDate = parseDateOnly(note.saleMode === "range" ? note.saleEndDate : note.saleDate);
         if (!saleDate) return false;
         const threshold = new Date();
         threshold.setHours(0, 0, 0, 0);
@@ -2384,7 +2402,7 @@
 
       async function purgeExpiredOneTimeNotes() {
         if (!hasSession()) return 0;
-        const expired = getDiscountRows().filter(isExpiredOneTimeNote);
+        const expired = getDiscountRows().filter(isExpiredDiscountNote);
         if (!expired.length) return 0;
 
         const expiredIds = new Set(expired.map((note) => note.id));
@@ -2480,23 +2498,46 @@
 
       function describeSaleSchedule(note) {
         const weekdays = ["日曜日", "月曜日", "火曜日", "水曜日", "木曜日", "金曜日", "土曜日"];
+        const weekdayValues = normalizeCsvNumbers(note.saleWeekdays || note.saleWeekday, 0, 6);
+        const monthDayValues = normalizeCsvNumbers(note.saleMonthDays || note.saleMonthDay, 1, 31);
         if (note.saleMode === "weekly") {
-          return `毎週${weekdays[Number(note.saleWeekday)] || "曜日未設定"}`;
+          return weekdayValues.length
+            ? `毎週${weekdayValues.map((day) => weekdays[day]).join("・")}`
+            : "毎週 曜日未設定";
         }
         if (note.saleMode === "monthly") {
-          return `毎月${note.saleMonthDay || "未設定"}日`;
+          return monthDayValues.length
+            ? `毎月${monthDayValues.join("・")}日`
+            : "毎月 日にち未設定";
+        }
+        if (note.saleMode === "range") {
+          return `${note.saleDate || "開始日未設定"} 〜 ${note.saleEndDate || "終了日未設定"}`;
         }
         return note.saleDate || "未設定";
       }
 
+      function normalizeCsvNumbers(value, min, max) {
+        const values = String(value || "")
+          .split(/[,、\s]+/)
+          .map((item) => Number(item.trim()))
+          .filter((item) => Number.isInteger(item) && item >= min && item <= max);
+        return [...new Set(values)].sort((a, b) => a - b);
+      }
+
+      function selectedWeekdays() {
+        return [...elements.saleWeekday.selectedOptions].map((option) => option.value).join(",");
+      }
+
       function syncScheduleFields() {
         const mode = elements.saleMode.value;
-        elements.saleDateWrap.classList.toggle("hidden", mode !== "once");
+        elements.saleDateWrap.classList.toggle("hidden", !["once", "range"].includes(mode));
         elements.saleWeekdayWrap.classList.toggle("hidden", mode !== "weekly");
         elements.saleMonthDayWrap.classList.toggle("hidden", mode !== "monthly");
-        elements.saleDate.required = mode === "once";
+        elements.saleEndDateWrap.classList.toggle("hidden", mode !== "range");
+        elements.saleDate.required = ["once", "range"].includes(mode);
         elements.saleWeekday.required = mode === "weekly";
         elements.saleMonthDay.required = mode === "monthly";
+        elements.saleEndDate.required = mode === "range";
       }
 
       function distanceMeters(fromLat, fromLon, toLat, toLon) {
@@ -3037,6 +3078,25 @@
         if (!store) return;
 
         const allNotes = loadNotes();
+        const saleMode = elements.saleMode.value;
+        const saleWeekdays = selectedWeekdays();
+        const saleMonthDays = normalizeCsvNumbers(elements.saleMonthDay.value, 1, 31).join(",");
+        if (saleMode === "weekly" && !saleWeekdays) {
+          setStatus("error", "毎週の割引は曜日を1つ以上選んでください。");
+          return;
+        }
+        if (saleMode === "monthly" && !saleMonthDays) {
+          setStatus("error", "毎月の割引は1〜31の日にちを入力してください。例: 10,20,30");
+          return;
+        }
+        if (saleMode === "range") {
+          const start = parseDateOnly(elements.saleDate.value);
+          const end = parseDateOnly(elements.saleEndDate.value);
+          if (!start || !end || end < start) {
+            setStatus("error", "期間割引は開始日と終了日を正しく入力してください。");
+            return;
+          }
+        }
         const newNote = {
           id: crypto.randomUUID(),
           storeName: store.name,
@@ -3045,10 +3105,13 @@
           storeType: store.type,
           name: elements.itemName.value.trim(),
           price: Number(elements.itemPrice.value),
-          saleMode: elements.saleMode.value,
+          saleMode,
           saleDate: elements.saleDate.value,
-          saleWeekday: elements.saleWeekday.value,
-          saleMonthDay: elements.saleMonthDay.value,
+          saleEndDate: elements.saleEndDate.value,
+          saleWeekday: saleWeekdays.split(",")[0] || "",
+          saleWeekdays,
+          saleMonthDay: saleMonthDays.split(",")[0] || "",
+          saleMonthDays,
           note: elements.itemNote.value.trim(),
           createdAt: new Date().toLocaleDateString("ja-JP"),
         };

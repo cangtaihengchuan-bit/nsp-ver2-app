@@ -2862,14 +2862,29 @@ function incomesForDate(dateKey) {
 function discountsForDate(dateKey) {
   const date = dateFromInput(dateKey);
   return state.discounts.filter((discount) => {
+    const weekdays = normalizeCsvNumbers(discount.saleWeekdays || discount.saleWeekday, 0, 6);
+    const monthDays = normalizeCsvNumbers(discount.saleMonthDays || discount.saleMonthDay, 1, 31);
     if (discount.saleMode === "weekly") {
-      return Number(discount.saleWeekday) === date.getDay();
+      return weekdays.includes(date.getDay());
     }
     if (discount.saleMode === "monthly") {
-      return Number(discount.saleMonthDay) === date.getDate();
+      return monthDays.includes(date.getDate());
+    }
+    if (discount.saleMode === "range") {
+      const start = dateFromInput(discount.saleDate);
+      const end = dateFromInput(discount.saleEndDate);
+      return date >= start && date <= end;
     }
     return discount.saleDate === dateKey;
   });
+}
+
+function normalizeCsvNumbers(value, min, max) {
+  const values = String(value || "")
+    .split(/[,、\s]+/)
+    .map((item) => Number(item.trim()))
+    .filter((item) => Number.isInteger(item) && item >= min && item <= max);
+  return [...new Set(values)].sort((a, b) => a - b);
 }
 
 function sum(items) {
