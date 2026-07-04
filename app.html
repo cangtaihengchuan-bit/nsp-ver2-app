@@ -363,6 +363,11 @@
         display: none;
       }
 
+      .mobile-menu-close,
+      .mobile-menu-backdrop {
+        display: none;
+      }
+
       .location-panel,
       .discount-overview {
         display: grid;
@@ -874,9 +879,33 @@
           transition: transform 180ms ease;
         }
 
-        .auth-panel.menu-open,
-        .auth-panel:focus-within {
+        .auth-panel.menu-open {
           transform: translateX(0);
+        }
+
+        .mobile-menu-close {
+          display: grid;
+          width: 42px;
+          height: 42px;
+          margin-left: auto;
+          place-items: center;
+          border: 1px solid var(--line);
+          border-radius: 8px;
+          color: var(--ink);
+          background: var(--surface);
+          font-size: 1.4rem;
+          font-weight: 950;
+        }
+
+        .mobile-menu-backdrop {
+          position: fixed;
+          inset: 0;
+          z-index: 38;
+          background: rgb(7 17 28 / 0.54);
+        }
+
+        .mobile-menu-backdrop.is-open {
+          display: block;
         }
 
         .auth-panel.smart-hidden,
@@ -1549,7 +1578,9 @@
   <body>
     <main class="app">
       <button id="menuToggle" class="mobile-menu-btn" type="button" aria-controls="authPanel" aria-expanded="false">☰</button>
+      <button id="menuBackdrop" class="mobile-menu-backdrop" type="button" aria-label="メニューを閉じる"></button>
       <section id="authPanel" class="auth-panel" aria-label="ログイン">
+        <button id="menuClose" class="mobile-menu-close" type="button" aria-label="メニューを閉じる">×</button>
         <div class="experience-brand">
           <span class="brand-mark">K</span>
           <strong>Kaimono Clock</strong>
@@ -1819,14 +1850,25 @@
         const panel = document.querySelector("#authPanel");
         if (!panel) return;
         const toggle = document.querySelector("#menuToggle");
+        const close = document.querySelector("#menuClose");
+        const backdrop = document.querySelector("#menuBackdrop");
 
         const setOpen = (open) => {
           panel.classList.toggle("menu-open", open);
           toggle?.setAttribute("aria-expanded", String(open));
+          backdrop?.classList.toggle("is-open", open);
         };
 
         panel.classList.remove("smart-hidden", "smart-visible");
         toggle?.addEventListener("click", () => setOpen(!panel.classList.contains("menu-open")));
+        close?.addEventListener("click", () => {
+          setOpen(false);
+          toggle?.focus();
+        });
+        backdrop?.addEventListener("click", () => setOpen(false));
+        document.addEventListener("keydown", (event) => {
+          if (event.key === "Escape") setOpen(false);
+        });
         panel.querySelectorAll("a").forEach((link) => {
           link.addEventListener("click", () => setOpen(false));
         });

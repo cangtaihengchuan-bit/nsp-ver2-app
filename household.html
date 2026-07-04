@@ -1234,6 +1234,11 @@ h3 {
       display: none;
     }
 
+    .mobile-menu-close,
+    .mobile-menu-backdrop {
+      display: none;
+    }
+
     @media (max-width: 640px) {
       .mobile-menu-btn {
         position: sticky;
@@ -1270,9 +1275,33 @@ h3 {
         transition: transform 180ms ease;
       }
 
-      .experience-nav.menu-open,
-      .experience-nav:focus-within {
+      .experience-nav.menu-open {
         transform: translateX(0);
+      }
+
+      .mobile-menu-close {
+        display: grid;
+        width: 42px;
+        height: 42px;
+        margin-left: auto;
+        place-items: center;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        color: var(--ink);
+        background: var(--panel);
+        font-size: 1.4rem;
+        font-weight: 950;
+      }
+
+      .mobile-menu-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 38;
+        background: rgb(7 17 28 / 0.54);
+      }
+
+      .mobile-menu-backdrop.is-open {
+        display: block;
       }
 
       .experience-brand,
@@ -1629,7 +1658,9 @@ h3 {
   <body>
     <div class="app-shell">
       <button id="menuToggle" class="mobile-menu-btn" type="button" aria-controls="experienceNav" aria-expanded="false">☰</button>
+      <button id="menuBackdrop" class="mobile-menu-backdrop" type="button" aria-label="メニューを閉じる"></button>
       <nav id="experienceNav" class="experience-nav" aria-label="アプリ体験ナビゲーション">
+        <button id="menuClose" class="mobile-menu-close" type="button" aria-label="メニューを閉じる">×</button>
         <div class="experience-brand">
           <span class="experience-logo">K</span>
           <strong>Kaimono Clock</strong>
@@ -1915,12 +1946,20 @@ function setupThemeControls() {
 function setupMobileMenu() {
   const nav = document.querySelector("#experienceNav");
   const toggle = document.querySelector("#menuToggle");
+  const close = document.querySelector("#menuClose");
+  const backdrop = document.querySelector("#menuBackdrop");
   if (!nav || !toggle) return;
   const setOpen = (open) => {
     nav.classList.toggle("menu-open", open);
     toggle.setAttribute("aria-expanded", String(open));
+    backdrop?.classList.toggle("is-open", open);
   };
   toggle.addEventListener("click", () => setOpen(!nav.classList.contains("menu-open")));
+  close?.addEventListener("click", () => {
+    setOpen(false);
+    toggle.focus();
+  });
+  backdrop?.addEventListener("click", () => setOpen(false));
   nav.querySelectorAll("a").forEach((link) => {
     link.addEventListener("click", () => setOpen(false));
   });
