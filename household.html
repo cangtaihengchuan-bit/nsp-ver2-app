@@ -1224,6 +1224,25 @@ h3 {
       white-space: nowrap;
     }
 
+    .session-logout {
+      min-height: 38px;
+      display: inline-grid;
+      place-items: center;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 0 12px;
+      color: var(--ink);
+      background: #fff;
+      font: inherit;
+      font-weight: 900;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    .session-logout[hidden] {
+      display: none;
+    }
+
     .experience-link.primary {
       border-color: transparent;
       color: #fff;
@@ -1315,6 +1334,10 @@ h3 {
       }
 
       .session-pill {
+        width: 100%;
+      }
+
+      .session-logout {
         width: 100%;
       }
     }
@@ -1675,6 +1698,7 @@ h3 {
         </label>
         <div class="experience-links">
           <span id="sessionPill" class="session-pill">未ログイン</span>
+          <button id="householdLogoutBtn" class="session-logout" type="button" hidden>ログアウト</button>
           <a class="experience-link" href="./index.html">体験トップ</a>
           <a class="experience-link" href="./app.html">買い時メモ</a>
           <a class="experience-link primary" href="./household.html" aria-current="page">家計簿体験</a>
@@ -1927,6 +1951,7 @@ const SESSION_KEY = "kaimono-clock-session-v2";
 const DISCOUNT_CACHE_KEY_PREFIX = "kaimono-clock-discount-cache-v2";
 const THEME_KEY = "kaimono-clock-theme";
 const sessionPill = document.querySelector("#sessionPill");
+const householdLogoutBtn = document.querySelector("#householdLogoutBtn");
 
 function setupThemeControls() {
   const theme = localStorage.getItem(THEME_KEY) || "cool";
@@ -2065,6 +2090,7 @@ async function init() {
   els.tabs.forEach((tab) => {
     tab.addEventListener("click", () => setView(tab.dataset.view));
   });
+  householdLogoutBtn?.addEventListener("click", signOut);
 
   setView(state.activeView, false);
   if (currentUserId()) {
@@ -2086,9 +2112,12 @@ function renderSessionPill() {
   if (!sessionPill) return;
   try {
     const session = JSON.parse(localStorage.getItem(SESSION_KEY) || "null");
-    sessionPill.textContent = session?.user?.email ? `ログイン中: ${maskEmail(session.user.email)}` : "未ログイン";
+    const signedIn = Boolean(session?.user?.email);
+    sessionPill.textContent = signedIn ? `ログイン中: ${maskEmail(session.user.email)}` : "未ログイン";
+    if (householdLogoutBtn) householdLogoutBtn.hidden = !signedIn;
   } catch {
     sessionPill.textContent = "未ログイン";
+    if (householdLogoutBtn) householdLogoutBtn.hidden = true;
   }
 }
 
@@ -2172,6 +2201,26 @@ async function supabaseRequest(path, options = {}) {
   }
   if (response.status === 204) return null;
   return response.json();
+}
+
+async function signOut() {
+  const session = currentSession();
+  if (session?.access_token) {
+    await fetch(`${SUPABASE_URL}/auth/v1/logout`, {
+      method: "POST",
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${session.access_token}`
+      }
+    }).catch(() => null);
+  }
+  saveSession(null);
+  state.expenses = [];
+  state.incomes = [];
+  state.discounts = [];
+  state.monthlyBudgets = {};
+  state.categoryBudgets = {};
+  render();
 }
 
 function loadDiscountCache() {
