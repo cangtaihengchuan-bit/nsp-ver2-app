@@ -56,7 +56,7 @@
       .app {
         width: min(1180px, calc(100% - 28px));
         margin: 0 auto;
-        padding: 22px 0 30px;
+        padding: 10px 0 30px;
       }
 
       .hero,
@@ -76,12 +76,12 @@
       }
 
       .hero {
-        min-height: 214px;
+        min-height: auto;
         display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
-        gap: 24px;
-        align-items: end;
-        padding: 26px;
+        grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+        gap: 14px;
+        align-items: center;
+        padding: 14px;
       }
 
       .hero > div {
@@ -115,9 +115,9 @@
 
       h1 {
         max-width: 760px;
-        margin: 14px 0 12px;
-        font-size: clamp(2rem, 5vw, 4.4rem);
-        line-height: 1.05;
+        margin: 10px 0 0;
+        font-size: clamp(1.55rem, 4vw, 2.5rem);
+        line-height: 1.15;
         letter-spacing: 0;
         overflow-wrap: anywhere;
       }
@@ -128,6 +128,7 @@
 
       .lead {
         max-width: 720px;
+        display: none;
         margin-bottom: 0;
         color: #34443f;
         line-height: 1.85;
@@ -139,7 +140,7 @@
       }
 
       .proof-list {
-        display: flex;
+        display: none;
         align-items: stretch;
         gap: 10px;
         margin: 18px 0 0;
@@ -257,13 +258,16 @@
       }
 
       .auth-panel {
+        position: sticky;
+        top: 8px;
+        z-index: 20;
         display: grid;
         width: min(100%, 680px);
         grid-template-columns: 1fr;
         gap: 10px;
         align-items: end;
         margin-left: auto;
-        margin-bottom: 14px;
+        margin-bottom: 8px;
         padding: 12px;
       }
 
@@ -329,6 +333,12 @@
         gap: 16px;
         margin-bottom: 14px;
         padding: 18px;
+      }
+
+      .hidden-panel,
+      .discount-overview.hidden-panel,
+      .main-grid.hidden-panel {
+        display: none;
       }
 
       .location-panel {
@@ -432,7 +442,7 @@
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 12px;
-        margin-bottom: 14px;
+        margin-bottom: 10px;
       }
 
       .metric-card {
@@ -457,6 +467,31 @@
         display: grid;
         grid-template-columns: minmax(290px, 380px) 1fr;
         gap: 14px;
+      }
+
+      .view-switch {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+        margin: 0 0 10px;
+        padding: 6px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.86);
+      }
+
+      .view-tab {
+        min-height: 40px;
+        border: 0;
+        border-radius: 8px;
+        color: var(--muted);
+        background: transparent;
+        font-weight: 950;
+      }
+
+      .view-tab.active {
+        color: #fff;
+        background: var(--mint-dark);
       }
 
       .stores,
@@ -927,14 +962,65 @@
 
       @media (max-width: 640px) {
         .student-modes {
-          display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
+          display: none;
         }
 
         .student-modes span {
           justify-content: center;
           text-align: center;
           white-space: normal;
+        }
+
+        .app {
+          padding-top: 6px;
+        }
+
+        .auth-panel {
+          top: 6px;
+          padding: 8px;
+        }
+
+        .auth-form {
+          grid-template-columns: 1fr 1fr;
+          gap: 6px;
+        }
+
+        .auth-form label {
+          min-width: 0;
+        }
+
+        .auth-form button {
+          min-height: 38px;
+        }
+
+        .hero {
+          padding: 10px;
+          gap: 10px;
+        }
+
+        .brand {
+          width: 100%;
+          flex-wrap: wrap;
+        }
+
+        h1 {
+          max-width: 100%;
+          margin: 8px 0 0;
+          font-size: 1.16rem;
+          line-height: 1.35;
+          word-break: normal;
+        }
+
+        .hero-controls {
+          padding: 10px;
+          max-width: 100%;
+        }
+
+        .location-panel,
+        .discount-overview,
+        .stores,
+        .workspace {
+          padding: 12px;
         }
       }
     </style>
@@ -972,37 +1058,8 @@
             <a class="back-link" href="./index.html">体験トップ</a>
           </div>
           <h1>
-            <span>バイト代も</span>
-            <span>仕送りも、</span>
-            <span>ムダ買いで</span>
-            <span>減らさない。</span>
+            <span>近くの買い時を保存して、家計簿にも反映。</span>
           </h1>
-          <p class="lead">
-            <span>Kaimono Clockは、近くのお店の割引と</span>
-            <span>自分の買い物メモをひとつにします。</span>
-            <span>品物の価格とセール日を保存して、</span>
-            <span>必要なものを安いタイミングで見返せます。</span>
-          </p>
-          <div class="student-modes" aria-label="学生生活で使う場面">
-            <span>学校帰り</span>
-            <span>バイト前</span>
-            <span>ひとり暮らし</span>
-            <span>今月の予算確認</span>
-          </div>
-          <dl class="proof-list" aria-label="主なメリット">
-            <div>
-              <dt>1タップ</dt>
-              <dd>買い時を確認</dd>
-            </div>
-            <div>
-              <dt>週3分</dt>
-              <dd>生活費チェック</dd>
-            </div>
-            <div>
-              <dt>近所</dt>
-              <dd>スーパー・薬局を比較</dd>
-            </div>
-          </dl>
         </div>
         <div class="hero-controls">
           <div class="control-row">
@@ -1039,7 +1096,7 @@
         <button id="clearAllBtn" class="btn btn-ghost" type="button">保存メモを全削除</button>
       </section>
 
-      <section id="locationPanel" class="location-panel" aria-label="登録地点から探す">
+      <section id="locationPanel" class="location-panel hidden-panel" aria-label="登録地点から探す">
         <div class="panel-head">
           <div>
             <h2>登録地点からお店を探す</h2>
@@ -1080,17 +1137,21 @@
         </div>
       </section>
 
-      <section class="discount-overview" aria-label="保存済み割引一覧">
+      <div class="view-switch" role="tablist" aria-label="表示切り替え">
+        <button class="view-tab active" type="button" data-panel="stores">検索した店舗</button>
+        <button class="view-tab" type="button" data-panel="discounts">保存済み割引</button>
+      </div>
+
+      <section id="discountOverview" class="discount-overview hidden-panel" aria-label="保存済み割引一覧">
         <div class="panel-head">
           <div>
             <h2>保存済み割引一覧</h2>
-            <p class="muted">ログイン中のユーザーが登録した割引情報だけを、店名と合わせて確認できます。</p>
           </div>
         </div>
         <div id="discountList" class="discount-list"></div>
       </section>
 
-      <section class="main-grid">
+      <section id="mainGrid" class="main-grid">
         <aside class="stores" aria-label="店舗一覧">
           <div class="panel-head">
             <div>
@@ -1196,6 +1257,7 @@
         userPosition: null,
         notes: {},
         savedLocations: [],
+        activePanel: "stores",
         session: null,
         user: null,
       };
@@ -1245,6 +1307,9 @@
         storeCount: document.querySelector("#storeCount"),
         storeList: document.querySelector("#storeList"),
         chips: document.querySelectorAll(".chip"),
+        viewTabs: document.querySelectorAll(".view-tab"),
+        mainGrid: document.querySelector("#mainGrid"),
+        discountOverview: document.querySelector("#discountOverview"),
         emptyState: document.querySelector("#emptyState"),
         detailView: document.querySelector("#detailView"),
         detailType: document.querySelector("#detailType"),
@@ -1916,6 +1981,14 @@
         });
       }
 
+      function renderActivePanel() {
+        elements.viewTabs.forEach((tab) => {
+          tab.classList.toggle("active", tab.dataset.panel === state.activePanel);
+        });
+        elements.mainGrid.classList.toggle("hidden-panel", state.activePanel !== "stores");
+        elements.discountOverview.classList.toggle("hidden-panel", state.activePanel !== "discounts");
+      }
+
       async function searchFromPosition(lat, lon, label = "選択地点") {
         const radius = Number(elements.radiusSelect.value);
         state.userPosition = { lat, lon, label };
@@ -1924,6 +1997,7 @@
         try {
           state.stores = await fetchNearbyStores(lat, lon, radius);
           state.selectedStoreId = state.stores[0]?.id || "";
+          state.activePanel = "stores";
           setStatus(
             state.stores.length ? "ready" : "error",
             state.stores.length
@@ -1941,11 +2015,13 @@
         renderDetail();
         renderSavedLocations();
         renderDiscountList();
+        renderActivePanel();
       }
 
       function useSample() {
         state.stores = sampleStores;
         state.selectedStoreId = sampleStores[0].id;
+        state.activePanel = "stores";
         setStatus("ready", "サンプル店舗を表示しています。現在地取得で実データに切り替えできます。");
         render();
       }
@@ -1969,6 +2045,7 @@
       });
 
       elements.savedLocationBtn.addEventListener("click", () => {
+        elements.locationPanel.classList.remove("hidden-panel");
         elements.locationPanel.scrollIntoView({ behavior: "smooth", block: "start" });
         setStatus(
           hasSession() ? "ready" : "error",
@@ -1995,6 +2072,13 @@
           chip.classList.add("active");
           state.filter = chip.dataset.filter;
           renderStores();
+        });
+      });
+
+      elements.viewTabs.forEach((tab) => {
+        tab.addEventListener("click", () => {
+          state.activePanel = tab.dataset.panel;
+          renderActivePanel();
         });
       });
 
