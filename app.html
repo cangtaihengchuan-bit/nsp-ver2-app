@@ -1641,7 +1641,7 @@
         const panel = document.querySelector("#authPanel");
         if (!panel) return;
         let lastY = window.scrollY;
-        let hideTimer = 0;
+        let ticking = false;
 
         const setVisible = (visible) => {
           panel.classList.toggle("smart-visible", visible);
@@ -1649,24 +1649,26 @@
         };
 
         setVisible(true);
-        hideTimer = window.setTimeout(() => {
-          if (window.scrollY > 48 && !panel.matches(":focus-within")) setVisible(false);
-        }, 1800);
 
         window.addEventListener(
           "scroll",
           () => {
-            const currentY = window.scrollY;
-            const goingUp = currentY < lastY - 6;
-            const nearTop = currentY < 36;
-            window.clearTimeout(hideTimer);
-            setVisible(goingUp || nearTop);
-            if (goingUp && !nearTop) {
-              hideTimer = window.setTimeout(() => {
-                if (!panel.matches(":focus-within")) setVisible(false);
-              }, 2200);
-            }
-            lastY = currentY;
+            if (ticking) return;
+            ticking = true;
+            window.requestAnimationFrame(() => {
+              const currentY = window.scrollY;
+              const delta = currentY - lastY;
+              const nearTop = currentY < 24;
+              if (nearTop || panel.matches(":focus-within")) {
+                setVisible(true);
+              } else if (delta > 4) {
+                setVisible(false);
+              } else if (delta < -4) {
+                setVisible(true);
+              }
+              lastY = currentY;
+              ticking = false;
+            });
           },
           { passive: true }
         );
