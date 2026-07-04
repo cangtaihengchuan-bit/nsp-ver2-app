@@ -1171,6 +1171,7 @@
       const SUPABASE_ANON_KEY =
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndueHBoanJpY293enhia3dubWp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5MDk5ODMsImV4cCI6MjA5NzQ4NTk4M30.p6lu6gNpdkTg0Nvnxj05m2tHbYeihYP7jFPdIEWfSxo";
       const SUPABASE_TABLE = "nsp_user_discounts";
+      const SUPABASE_LOCATIONS_TABLE = "nsp_user_locations";
       const SESSION_KEY = "kaimono-clock-session-v2";
       const LOCATION_KEY_PREFIX = "kaimono-clock-locations-v2";
       const DISCOUNT_CACHE_KEY_PREFIX = "kaimono-clock-discount-cache-v2";
@@ -1310,6 +1311,26 @@
         localStorage.setItem(locationStorageKey(), JSON.stringify(state.savedLocations));
       }
 
+      function rowToLocation(row) {
+        return {
+          id: row.id,
+          name: row.label,
+          lat: Number(row.lat),
+          lon: Number(row.lon),
+          createdAt: row.created_at || "",
+        };
+      }
+
+      function locationToRow(location) {
+        return {
+          id: location.id,
+          user_id: state.user.id,
+          label: location.name,
+          lat: Number(location.lat),
+          lon: Number(location.lon),
+        };
+      }
+
       function supabaseHeaders(extra = {}) {
         const token = state.session?.access_token || SUPABASE_ANON_KEY;
         return {
@@ -1388,7 +1409,7 @@
         saveSession(data);
         await loadNotesFromSupabase();
         await migrateLocalBackupIfEmpty();
-        state.savedLocations = loadSavedLocations();
+        await loadLocationsFromSupabase();
         render();
         setStatus("ready", "ログインしました。保存済みの割引情報を読み込みました。");
       }
@@ -1399,7 +1420,7 @@
           saveSession(data);
           await loadNotesFromSupabase();
           await migrateLocalBackupIfEmpty();
-          state.savedLocations = loadSavedLocations();
+          await loadLocationsFromSupabase();
           render();
           setStatus("ready", "アカウントを作成し、ログインしました。");
           return;
@@ -1520,6 +1541,48 @@
 
       async function clearNotesFromSupabase() {
         await supabaseRequest(`${SUPABASE_TABLE}?id=not.is.null`, {
+          method: "DELETE",
+          headers: { Prefer: "return=minimal" },
+        });
+      }
+
+      async function loadLocationsFromSupabase() {
+        if (!hasSession()) {
+          state.savedLocations = [];
+          return;
+        }
+
+        const localLocations = loadSavedLocations();
+        try {
+          const rows = await supabaseRequest(`${SUPABASE_LOCATIONS_TABLE}?select=*&order=created_at.desc`);
+          state.savedLocations = (rows || []).map(rowToLocation);
+          if (!state.savedLocations.length && localLocations.length) {
+            for (const location of localLocations) {
+              await insertLocationToSupabase(location);
+            }
+            state.savedLocations = localLocations;
+            setStatus("ready", "この端末の登録地点をSupabaseへ移行しました。");
+          }
+          saveSavedLocations();
+        } catch {
+          state.savedLocations = localLocations;
+          setStatus(
+            "error",
+            "登録地点をSupabaseから読み込めませんでした。supabase_user_locations_schema.sql を実行済みか確認してください。",
+          );
+        }
+      }
+
+      async function insertLocationToSupabase(location) {
+        await supabaseRequest(SUPABASE_LOCATIONS_TABLE, {
+          method: "POST",
+          headers: { Prefer: "return=minimal" },
+          body: JSON.stringify(locationToRow(location)),
+        });
+      }
+
+      async function deleteLocationFromSupabase(locationId) {
+        await supabaseRequest(`${SUPABASE_LOCATIONS_TABLE}?id=eq.${encodeURIComponent(locationId)}`, {
           method: "DELETE",
           headers: { Prefer: "return=minimal" },
         });
@@ -1782,11 +1845,16 @@
           card.querySelector('[data-action="search"]').addEventListener("click", () => {
             searchFromPosition(Number(location.lat), Number(location.lon), location.name);
           });
-          card.querySelector('[data-action="delete"]').addEventListener("click", () => {
+          card.querySelector('[data-action="delete"]').addEventListener("click", async () => {
             state.savedLocations = state.savedLocations.filter((item) => item.id !== location.id);
             saveSavedLocations();
             renderSavedLocations();
-            setStatus("ready", "登録地点を削除しました。");
+            try {
+              await deleteLocationFromSupabase(location.id);
+              setStatus("ready", "登録地点を削除しました。");
+            } catch {
+              setStatus("error", "登録地点の削除をSupabaseへ反映できませんでした。SQLを確認してください。");
+            }
           });
           elements.savedLocations.appendChild(card);
         });
@@ -1940,7 +2008,7 @@
         await signOut();
       });
 
-      elements.locationForm.addEventListener("submit", (event) => {
+      elements.locationForm.addEventListener("submit", async (event) => {
         event.preventDefault();
         if (!hasSession()) {
           setStatus("error", "登録地点を保存するにはログインしてください。");
@@ -1959,6 +2027,7 @@
           return;
         }
 
+        const replacedLocation = state.savedLocations.find((item) => item.name === name);
         const nextLocation = {
           id: crypto.randomUUID(),
           name,
@@ -1972,7 +2041,15 @@
         saveSavedLocations();
         elements.locationForm.reset();
         renderSavedLocations();
-        setStatus("ready", `${name}を登録しました。`);
+        try {
+          if (replacedLocation) {
+            await deleteLocationFromSupabase(replacedLocation.id);
+          }
+          await insertLocationToSupabase(nextLocation);
+          setStatus("ready", `${name}を登録しました。別端末でも同じアカウントで表示されます。`);
+        } catch {
+          setStatus("error", "登録地点をSupabaseへ保存できませんでした。supabase_user_locations_schema.sql を実行してください。");
+        }
       });
 
       elements.saveCurrentLocationBtn.addEventListener("click", () => {
@@ -2059,10 +2136,10 @@
       async function initializeApp() {
         restoreSession();
         if (hasSession()) {
-          state.savedLocations = loadSavedLocations();
           try {
             await loadNotesFromSupabase();
             await migrateLocalBackupIfEmpty();
+            await loadLocationsFromSupabase();
           } catch {
             state.notes = {};
             setStatus("error", "Supabaseから読み込めませんでした。supabase_user_auth_schema.sql を実行済みか確認してください。");
