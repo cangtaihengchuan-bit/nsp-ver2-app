@@ -34,10 +34,10 @@
       }
 
       main {
-        width: min(760px, calc(100% - 28px));
+        width: min(820px, calc(100% - 28px));
         display: grid;
         gap: 18px;
-        padding: 24px;
+        padding: 18px;
         border: 1px solid rgba(220, 230, 228, 0.95);
         border-radius: 8px;
         background: rgba(255, 255, 255, 0.92);
@@ -45,15 +45,24 @@
         backdrop-filter: blur(14px);
       }
 
+      .top-row {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
       .brand {
         display: flex;
         align-items: center;
         gap: 12px;
+        min-width: 0;
         font-weight: 900;
       }
 
       .logo {
         display: grid;
+        flex: 0 0 48px;
         width: 48px;
         height: 48px;
         place-items: center;
@@ -62,7 +71,95 @@
         background: linear-gradient(140deg, var(--mint), var(--coral));
       }
 
+      .auth-box {
+        width: min(100%, 430px);
+        display: grid;
+        gap: 8px;
+        margin-left: auto;
+        padding: 10px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: rgba(255, 253, 247, 0.9);
+      }
+
+      .auth-status {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 8px;
+        color: var(--muted);
+        font-size: 0.86rem;
+        font-weight: 900;
+      }
+
+      .dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 999px;
+        background: #98a29f;
+      }
+
+      .dot.ready {
+        background: var(--mint);
+      }
+
+      .dot.error {
+        background: var(--coral);
+      }
+
+      .auth-form {
+        display: grid;
+        grid-template-columns: minmax(130px, 1fr) minmax(110px, 0.8fr) auto;
+        gap: 8px;
+      }
+
+      input,
+      button {
+        min-height: 40px;
+        border-radius: 8px;
+        font: inherit;
+      }
+
+      input {
+        width: 100%;
+        min-width: 0;
+        border: 1px solid var(--line);
+        padding: 0 10px;
+        outline: none;
+      }
+
+      button {
+        border: 0;
+        padding: 0 12px;
+        color: #fff;
+        background: var(--mint-dark);
+        font-weight: 900;
+        cursor: pointer;
+      }
+
+      .logout-btn {
+        color: var(--ink);
+        background: #fff;
+        border: 1px solid var(--line);
+      }
+
+      .auth-box.signed-in .auth-form {
+        display: none;
+      }
+
+      .auth-session {
+        display: none;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 8px;
+      }
+
+      .auth-box.signed-in .auth-session {
+        display: flex;
+      }
+
       h1 {
+        max-width: 720px;
         margin: 0;
         font-size: clamp(2rem, 7vw, 4.2rem);
         line-height: 1.05;
@@ -109,29 +206,72 @@
         font-size: 0.86rem;
       }
 
-      @media (max-width: 640px) {
+      @media (max-width: 760px) {
+        body {
+          align-items: start;
+          padding: 12px 0;
+        }
+
         main {
           width: min(390px, calc(100% - 20px));
           margin-inline: auto;
-          padding: 18px;
+          padding: 14px;
         }
 
+        .top-row,
+        .auth-session {
+          align-items: stretch;
+          flex-direction: column;
+        }
+
+        .auth-box {
+          width: 100%;
+        }
+
+        .auth-status {
+          justify-content: flex-start;
+        }
+
+        .auth-form,
         .actions {
           grid-template-columns: 1fr;
+        }
+
+        h1 {
+          font-size: clamp(2rem, 13vw, 3.1rem);
         }
       }
     </style>
   </head>
   <body>
     <main aria-label="Kaimono Clock 体験トップ">
-      <div class="brand">
-        <span class="logo">K</span>
-        <strong>Kaimono Clock</strong>
+      <div class="top-row">
+        <div class="brand">
+          <span class="logo">K</span>
+          <strong>Kaimono Clock</strong>
+        </div>
+
+        <section id="authBox" class="auth-box" aria-label="ログイン">
+          <div class="auth-status">
+            <span id="authDot" class="dot"></span>
+            <span id="authStatus">未ログイン</span>
+          </div>
+          <form id="authForm" class="auth-form">
+            <input id="authEmail" type="email" autocomplete="email" placeholder="メール" required />
+            <input id="authPassword" type="password" autocomplete="current-password" placeholder="パスワード" required />
+            <button type="submit">ログイン</button>
+          </form>
+          <div class="auth-session">
+            <span id="authUser"></span>
+            <button id="logoutBtn" class="logout-btn" type="button">ログアウト</button>
+          </div>
+        </section>
       </div>
+
       <h1>買い時と家計を、ひとつの体験で。</h1>
       <p>
         近くのお店の割引メモを保存し、同じ情報を家計簿カレンダーでも確認できます。
-        まずは買い時メモか、家計簿体験を選んでください。
+        スマホからすぐ開けて、必要なものと残り予算を軽く見直せます。
       </p>
       <div class="actions">
         <a class="primary" href="./app.html">
@@ -144,5 +284,101 @@
         </a>
       </div>
     </main>
+
+    <script>
+      const SUPABASE_URL = "https://wnxphjricowzxbkwnmjx.supabase.co";
+      const SUPABASE_ANON_KEY =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndueHBoanJpY293enhia3dubWp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5MDk5ODMsImV4cCI6MjA5NzQ4NTk4M30.p6lu6gNpdkTg0Nvnxj05m2tHbYeihYP7jFPdIEWfSxo";
+      const SESSION_KEY = "kaimono-clock-session-v2";
+
+      const elements = {
+        authBox: document.querySelector("#authBox"),
+        authDot: document.querySelector("#authDot"),
+        authStatus: document.querySelector("#authStatus"),
+        authForm: document.querySelector("#authForm"),
+        authEmail: document.querySelector("#authEmail"),
+        authPassword: document.querySelector("#authPassword"),
+        authUser: document.querySelector("#authUser"),
+        logoutBtn: document.querySelector("#logoutBtn"),
+      };
+
+      let session = null;
+
+      function saveSession(nextSession) {
+        session = nextSession?.access_token ? nextSession : null;
+        if (session) {
+          localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+        } else {
+          localStorage.removeItem(SESSION_KEY);
+        }
+        renderAuth();
+      }
+
+      function restoreSession() {
+        try {
+          const saved = JSON.parse(localStorage.getItem(SESSION_KEY) || "null");
+          session = saved?.access_token && saved?.user ? saved : null;
+        } catch {
+          localStorage.removeItem(SESSION_KEY);
+          session = null;
+        }
+        renderAuth();
+      }
+
+      function renderAuth(message = "") {
+        const signedIn = Boolean(session?.access_token && session?.user);
+        elements.authBox.classList.toggle("signed-in", signedIn);
+        elements.authDot.className = `dot ${signedIn ? "ready" : ""}`;
+        elements.authStatus.textContent = message || (signedIn ? "ログイン中" : "未ログイン");
+        elements.authUser.textContent = signedIn ? session.user.email : "";
+      }
+
+      async function authRequest(path, body) {
+        const response = await fetch(`${SUPABASE_URL}/auth/v1/${path}`, {
+          method: "POST",
+          headers: {
+            apikey: SUPABASE_ANON_KEY,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(body),
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          throw new Error(data.error_description || data.msg || data.message || "Auth request failed");
+        }
+        return data;
+      }
+
+      elements.authForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        renderAuth("確認中...");
+        try {
+          const data = await authRequest("token?grant_type=password", {
+            email: elements.authEmail.value.trim(),
+            password: elements.authPassword.value,
+          });
+          saveSession(data);
+          elements.authPassword.value = "";
+        } catch {
+          elements.authDot.className = "dot error";
+          elements.authStatus.textContent = "ログイン失敗";
+        }
+      });
+
+      elements.logoutBtn.addEventListener("click", async () => {
+        if (session?.access_token) {
+          await fetch(`${SUPABASE_URL}/auth/v1/logout`, {
+            method: "POST",
+            headers: {
+              apikey: SUPABASE_ANON_KEY,
+              Authorization: `Bearer ${session.access_token}`,
+            },
+          }).catch(() => null);
+        }
+        saveSession(null);
+      });
+
+      restoreSession();
+    </script>
   </body>
 </html>

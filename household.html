@@ -1194,6 +1194,20 @@ h3 {
       white-space: nowrap;
     }
 
+    .session-pill {
+      min-height: 38px;
+      display: inline-grid;
+      place-items: center;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 0 10px;
+      color: var(--muted);
+      background: rgba(255, 253, 247, 0.86);
+      font-size: 0.84rem;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
     .experience-link.primary {
       border-color: transparent;
       color: #fff;
@@ -1210,6 +1224,10 @@ h3 {
       .experience-link {
         width: 100%;
       }
+
+      .session-pill {
+        width: 100%;
+      }
     }
 
     </style>
@@ -1222,6 +1240,7 @@ h3 {
           <strong>Kaimono Clock</strong>
         </div>
         <div class="experience-links">
+          <span id="sessionPill" class="session-pill">未ログイン</span>
           <a class="experience-link" href="./index.html">体験トップ</a>
           <a class="experience-link" href="./app.html">買い時メモ</a>
           <a class="experience-link primary" href="./household.html" aria-current="page">家計簿体験</a>
@@ -1467,6 +1486,7 @@ const incomeCategories = [
 
 const SESSION_KEY = "kaimono-clock-session-v2";
 const DISCOUNT_CACHE_KEY_PREFIX = "kaimono-clock-discount-cache-v2";
+const sessionPill = document.querySelector("#sessionPill");
 
 const yen = new Intl.NumberFormat("ja-JP", {
   style: "currency",
@@ -1530,6 +1550,7 @@ const els = {
 init();
 
 function init() {
+  renderSessionPill();
   els.category.innerHTML = categories
     .map((category) => `<option value="${category.id}">${category.label}</option>`)
     .join("");
@@ -1557,6 +1578,16 @@ function init() {
   render();
   const entryDate = new URLSearchParams(location.search).get("entry");
   if (entryDate) openEntryModal(entryDate);
+}
+
+function renderSessionPill() {
+  if (!sessionPill) return;
+  try {
+    const session = JSON.parse(localStorage.getItem(SESSION_KEY) || "null");
+    sessionPill.textContent = session?.user?.email ? `ログイン中: ${session.user.email}` : "未ログイン";
+  } catch {
+    sessionPill.textContent = "未ログイン";
+  }
 }
 
 function loadJson(key, fallback) {

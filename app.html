@@ -258,15 +258,17 @@
 
       .auth-panel {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
-        gap: 16px;
+        width: min(100%, 680px);
+        grid-template-columns: 1fr;
+        gap: 10px;
         align-items: end;
+        margin-left: auto;
         margin-bottom: 14px;
-        padding: 18px;
+        padding: 12px;
       }
 
       .auth-copy {
-        display: grid;
+        display: none;
         gap: 4px;
       }
 
@@ -285,9 +287,20 @@
 
       .auth-form {
         display: grid;
-        grid-template-columns: minmax(170px, 1fr) minmax(150px, 0.9fr) auto auto;
+        grid-template-columns: minmax(160px, 1fr) minmax(140px, 0.82fr) auto auto;
         gap: 10px;
         align-items: end;
+      }
+
+      .auth-form label {
+        gap: 0;
+        color: transparent;
+        font-size: 0;
+      }
+
+      .auth-form input {
+        color: var(--ink);
+        font-size: 0.95rem;
       }
 
       .auth-session {
@@ -928,6 +941,29 @@
   </head>
   <body>
     <main class="app">
+      <section id="authPanel" class="auth-panel" aria-label="ログイン">
+        <div class="auth-copy">
+          <h2>ログインして自分だけの割引メモを保存</h2>
+          <p>メールアドレスとパスワードでログインすると、保存した割引情報は他のユーザーから見えません。</p>
+        </div>
+        <form id="authForm" class="auth-form">
+          <label>
+            メールアドレス
+            <input id="authEmail" type="email" autocomplete="email" placeholder="student@example.com" required />
+          </label>
+          <label>
+            パスワード
+            <input id="authPassword" type="password" autocomplete="current-password" placeholder="8文字以上" required />
+          </label>
+          <button id="loginBtn" class="btn btn-primary" type="submit">ログイン</button>
+          <button id="signupBtn" class="btn btn-ghost" type="button">新規作成</button>
+        </form>
+        <div class="auth-session">
+          <span class="auth-user" id="authUser">未ログイン</span>
+          <button id="logoutBtn" class="btn btn-ghost" type="button">ログアウト</button>
+        </div>
+      </section>
+
       <section class="hero" aria-label="Kaimono Clock">
         <div>
           <div class="brand">
@@ -1001,29 +1037,6 @@
           <span id="statusText">位置情報を許可すると、近くのスーパーとドラッグストアから買い時候補を探します。</span>
         </div>
         <button id="clearAllBtn" class="btn btn-ghost" type="button">保存メモを全削除</button>
-      </section>
-
-      <section id="authPanel" class="auth-panel" aria-label="ログイン">
-        <div class="auth-copy">
-          <h2>ログインして自分だけの割引メモを保存</h2>
-          <p>メールアドレスとパスワードでログインすると、保存した割引情報は他のユーザーから見えません。</p>
-        </div>
-        <form id="authForm" class="auth-form">
-          <label>
-            メールアドレス
-            <input id="authEmail" type="email" autocomplete="email" placeholder="student@example.com" required />
-          </label>
-          <label>
-            パスワード
-            <input id="authPassword" type="password" autocomplete="current-password" placeholder="8文字以上" required />
-          </label>
-          <button id="loginBtn" class="btn btn-primary" type="submit">ログイン</button>
-          <button id="signupBtn" class="btn btn-ghost" type="button">新規作成</button>
-        </form>
-        <div class="auth-session">
-          <span class="auth-user" id="authUser">未ログイン</span>
-          <button id="logoutBtn" class="btn btn-ghost" type="button">ログアウト</button>
-        </div>
       </section>
 
       <section id="locationPanel" class="location-panel" aria-label="登録地点から探す">
