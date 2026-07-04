@@ -1845,12 +1845,44 @@
         };
       }
 
+      function shouldRefreshSession() {
+        if (!state.session?.access_token) return false;
+        if (!state.session?.refresh_token) return false;
+        if (!state.session?.expires_at) return false;
+        return Math.floor(Date.now() / 1000) >= Number(state.session.expires_at) - 60;
+      }
+
+      async function refreshSession() {
+        if (!state.session?.refresh_token) {
+          saveSession(null);
+          throw new Error("Missing refresh token");
+        }
+        const data = await authRequest("token?grant_type=refresh_token", {
+          refresh_token: state.session.refresh_token,
+        });
+        saveSession(data);
+        return data;
+      }
+
+      async function ensureFreshSession() {
+        if (shouldRefreshSession()) {
+          await refreshSession();
+        }
+      }
+
       async function supabaseRequest(path, options = {}) {
+        if (hasSession()) {
+          await ensureFreshSession();
+        }
         const response = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
           ...options,
           headers: supabaseHeaders(options.headers || {}),
         });
         if (!response.ok) {
+          if (response.status === 401 && state.session?.refresh_token && !options.__retriedAfterRefresh) {
+            await refreshSession();
+            return supabaseRequest(path, { ...options, __retriedAfterRefresh: true });
+          }
           const message = await response.text();
           throw new Error(message || `Supabase request failed: ${response.status}`);
         }
