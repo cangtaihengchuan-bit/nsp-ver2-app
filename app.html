@@ -1538,13 +1538,29 @@
 
       @media (max-width: 980px) {
         .auth-panel {
-          grid-template-columns: minmax(170px, 1fr) minmax(130px, 170px);
+          grid-template-columns: minmax(190px, 1fr) minmax(130px, 170px);
+          align-items: stretch;
         }
 
         .auth-form,
         .auth-session,
         .experience-links {
           grid-column: 1 / -1;
+        }
+
+        .auth-form {
+          grid-template-columns: minmax(180px, 1fr) minmax(150px, 0.8fr) max-content max-content;
+          align-items: stretch;
+        }
+
+        .auth-form button {
+          min-width: 96px;
+          white-space: nowrap;
+        }
+
+        .experience-links {
+          justify-content: flex-start;
+          flex-wrap: wrap;
         }
       }
 
