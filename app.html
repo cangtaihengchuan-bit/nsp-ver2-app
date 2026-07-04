@@ -470,6 +470,25 @@
         overflow-wrap: anywhere;
       }
 
+      .label-edit-form {
+        display: grid;
+        grid-template-columns: minmax(120px, 1fr) auto;
+        gap: 8px;
+        align-items: center;
+        min-width: 0;
+      }
+
+      .label-edit-form input {
+        min-height: 36px;
+        font-size: 0.88rem;
+      }
+
+      .label-edit-form button {
+        min-height: 36px;
+        padding: 0 10px;
+        font-size: 0.84rem;
+      }
+
       .discount-price {
         color: var(--coral);
         font-weight: 950;
@@ -910,6 +929,7 @@
         }
 
         .discount-filter,
+        .label-edit-form,
         .sale-field {
           grid-template-columns: 1fr;
           grid-column: auto;
@@ -1952,6 +1972,20 @@
         return existing?.storeLabel || defaultStoreLabel(store);
       }
 
+      function updateLocalStoreLabel(storeId, storeLabel) {
+        const previousLabel = (state.notes[storeId] || []).find((note) => note.storeLabel)?.storeLabel || "";
+        const allNotes = loadNotes();
+        allNotes[storeId] = (allNotes[storeId] || []).map((note) => ({
+          ...note,
+          storeLabel,
+        }));
+        state.notes = allNotes;
+        if (state.discountLabelFilter === previousLabel) {
+          state.discountLabelFilter = storeLabel;
+        }
+        saveDiscountCache();
+      }
+
       function syncStoreLabelInput() {
         if (!elements.storeLabel) return;
         const store = state.stores.find((item) => item.id === state.selectedStoreId);
@@ -2257,6 +2291,20 @@
           method: "DELETE",
           headers: { Prefer: "return=minimal" },
         });
+      }
+
+      async function updateStoreLabelInSupabase(storeId, storeLabel) {
+        try {
+          await supabaseRequest(`${SUPABASE_TABLE}?store_id=eq.${encodeURIComponent(storeId)}`, {
+            method: "PATCH",
+            headers: { Prefer: "return=minimal" },
+            body: JSON.stringify({ store_label: storeLabel }),
+          });
+          return true;
+        } catch (error) {
+          if (String(error.message || "").includes("store_label")) return false;
+          throw error;
+        }
       }
 
       async function clearNotesFromSupabase() {
@@ -2627,6 +2675,10 @@
               <small class="muted">店舗</small>
               <strong>${escapeHtml(note.storeName || "店舗名なし")}</strong>
               <span class="store-label-pill">${escapeHtml(note.storeLabel || note.storeName || "ラベル未設定")}</span>
+              <form class="label-edit-form" data-store-id="${escapeHtml(note.storeId)}">
+                <input type="text" value="${escapeHtml(note.storeLabel || note.storeName || "")}" aria-label="店舗ラベル" required />
+                <button class="btn btn-ghost" type="submit">変更</button>
+              </form>
             </div>
             <div class="discount-sub">
               <small class="muted">商品</small>
@@ -2639,6 +2691,27 @@
               ${note.note ? `<small>${escapeHtml(note.note)}</small>` : ""}
             </div>
           `;
+          row.querySelector(".label-edit-form").addEventListener("submit", async (event) => {
+            event.preventDefault();
+            const form = event.currentTarget;
+            const storeId = form.dataset.storeId;
+            const input = form.querySelector("input");
+            const nextLabel = input.value.trim();
+            if (!storeId || !nextLabel) return;
+            updateLocalStoreLabel(storeId, nextLabel);
+            render();
+            try {
+              const persisted = await updateStoreLabelInSupabase(storeId, nextLabel);
+              setStatus(
+                persisted ? "ready" : "error",
+                persisted
+                  ? "同じ店舗の割引情報ラベルを更新しました。"
+                  : "画面上のラベルは更新しましたが、DB列が未作成のため永続保存されません。supabase_user_auth_schema.sqlを実行してください。",
+              );
+            } catch {
+              setStatus("error", "店舗ラベルをSupabaseへ保存できませんでした。");
+            }
+          });
           elements.discountList.appendChild(row);
         });
       }
