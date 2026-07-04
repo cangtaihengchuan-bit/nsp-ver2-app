@@ -1167,11 +1167,210 @@
       .dot.error {
         background: #38bdf8;
       }
+
+      .theme-control {
+        display: grid;
+        gap: 5px;
+        min-width: 150px;
+      }
+
+      .theme-control span {
+        color: var(--muted);
+        font-size: 0.76rem;
+        font-weight: 900;
+      }
+
+      .theme-control select {
+        min-height: 38px;
+        font-weight: 900;
+      }
+
+      .auth-panel {
+        grid-template-columns: minmax(130px, 160px) 1fr;
+      }
+
+      .auth-panel .auth-copy {
+        grid-column: 1 / -1;
+      }
+
+      .auth-panel {
+        transition: transform 180ms ease, opacity 180ms ease;
+      }
+
+      .auth-panel.smart-hidden {
+        pointer-events: none;
+        opacity: 0;
+        transform: translateY(calc(-100% - 16px));
+      }
+
+      .auth-panel.smart-visible,
+      .auth-panel:focus-within {
+        pointer-events: auto;
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      html[data-theme="cool"] {
+        --ink: #dce7ef;
+        --muted: #9aa8b4;
+        --paper: #151b23;
+        --surface: #1b222c;
+        --surface-soft: #161d26;
+        --line: #303b47;
+        --mint: #9cdcfe;
+        --mint-dark: #2b6f88;
+        --sky: #75beff;
+        --coral: #86c5df;
+        --lemon: #7aa7c7;
+        --navy: #111820;
+        --shadow: 0 18px 44px rgba(0, 0, 0, 0.34);
+      }
+
+      html[data-theme="warm"] {
+        color-scheme: light;
+        --ink: #182321;
+        --muted: #60716d;
+        --paper: #fffaf0;
+        --surface: #fffef8;
+        --surface-soft: #f7fbf8;
+        --line: #dce6e1;
+        --mint: #1f8f8b;
+        --mint-dark: #142c2c;
+        --sky: #4f9fe8;
+        --coral: #ff7a59;
+        --lemon: #f4c542;
+        --navy: #17213c;
+        --shadow: 0 18px 46px rgba(23, 33, 60, 0.12);
+      }
+
+      html[data-theme="white-blue"] {
+        color-scheme: light;
+        --ink: #213042;
+        --muted: #5b6f86;
+        --paper: #f5fbff;
+        --surface: #ffffff;
+        --surface-soft: #eef8ff;
+        --line: #b9d9f0;
+        --mint: #2f9edb;
+        --mint-dark: #226fa4;
+        --sky: #5bb8ee;
+        --coral: #3ba2d8;
+        --lemon: #8ccdf2;
+        --navy: #17446b;
+        --shadow: 0 14px 34px rgba(46, 112, 158, 0.16);
+      }
+
+      html[data-theme="cool"] body {
+        background:
+          radial-gradient(circle at 18% 10%, rgba(156, 220, 254, 0.13), transparent 25rem),
+          linear-gradient(180deg, #1e1e1e 0%, #1f252d 48%, #181c22 100%);
+      }
+
+      html[data-theme="warm"] body {
+        background:
+          linear-gradient(135deg, rgba(255, 246, 232, 0.9) 0%, rgba(237, 250, 245, 0.92) 44%, rgba(238, 246, 255, 0.94) 100%),
+          url("https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=2200&q=78") center / cover fixed;
+      }
+
+      html[data-theme="white-blue"] body {
+        background:
+          radial-gradient(circle at 16% 8%, rgba(91, 184, 238, 0.2), transparent 22rem),
+          linear-gradient(180deg, #ffffff 0%, #eef8ff 50%, #f8fcff 100%);
+      }
+
+      html[data-theme] .hero,
+      html[data-theme] .status,
+      html[data-theme] .auth-panel,
+      html[data-theme] .location-panel,
+      html[data-theme] .discount-overview,
+      html[data-theme] .stores,
+      html[data-theme] .workspace,
+      html[data-theme] .metric-card,
+      html[data-theme] .note-card,
+      html[data-theme] .proof-list div,
+      html[data-theme] .hero-controls,
+      html[data-theme] .saved-location-card,
+      html[data-theme] .discount-row,
+      html[data-theme] .store-card,
+      html[data-theme] .item-form,
+      html[data-theme] .blank-row {
+        border-color: var(--line);
+        background: color-mix(in srgb, var(--surface) 92%, transparent);
+      }
+
+      html[data-theme] select,
+      html[data-theme] input,
+      html[data-theme] textarea,
+      html[data-theme] .btn-ghost,
+      html[data-theme] .chip,
+      html[data-theme] .view-switch,
+      html[data-theme] .back-link {
+        color: var(--ink);
+        background: var(--surface-soft);
+        border-color: var(--line);
+      }
+
+      html[data-theme] .btn-primary,
+      html[data-theme] .view-tab.active {
+        color: #fff;
+        background: linear-gradient(135deg, var(--mint-dark), var(--sky));
+        box-shadow: none;
+      }
+
+      html[data-theme="cool"] .brand-mark {
+        background: linear-gradient(140deg, #2b6f88, #4b8da8);
+      }
+
+      html[data-theme="white-blue"] .brand,
+      html[data-theme="white-blue"] h1,
+      html[data-theme="white-blue"] .proof-list dt,
+      html[data-theme="white-blue"] .metric-card strong {
+        color: #17446b;
+      }
+
+      html[data-theme="warm"] .brand,
+      html[data-theme="warm"] h1,
+      html[data-theme="warm"] .proof-list dt,
+      html[data-theme="warm"] .metric-card strong {
+        color: #142c2c;
+      }
+
+      html[data-theme="warm"] .student-modes span,
+      html[data-theme="warm"] .chip.active,
+      html[data-theme="warm"] .type-pill,
+      html[data-theme="warm"] .note-meta span {
+        color: #753b25;
+        background: #fff7ed;
+        border-color: rgba(255, 122, 89, 0.2);
+      }
+
+      html[data-theme="white-blue"] .student-modes span,
+      html[data-theme="white-blue"] .chip.active,
+      html[data-theme="white-blue"] .type-pill,
+      html[data-theme="white-blue"] .note-meta span {
+        color: #226fa4;
+        background: #e6f5ff;
+        border-color: #b9d9f0;
+      }
+
+      @media (max-width: 980px) {
+        .auth-panel {
+          grid-template-columns: 1fr;
+        }
+      }
     </style>
   </head>
   <body>
     <main class="app">
       <section id="authPanel" class="auth-panel" aria-label="ログイン">
+        <label class="theme-control">
+          <span>カラー</span>
+          <select data-theme-select aria-label="テーマカラー">
+            <option value="warm">暖色</option>
+            <option value="cool">寒色</option>
+            <option value="white-blue">白青</option>
+          </select>
+        </label>
         <div class="auth-copy">
           <h2>ログインして自分だけの割引メモを保存</h2>
           <p>メールアドレスとパスワードでログインすると、保存した割引情報は他のユーザーから見えません。</p>
@@ -1393,6 +1592,59 @@
       const SESSION_KEY = "kaimono-clock-session-v2";
       const LOCATION_KEY_PREFIX = "kaimono-clock-locations-v2";
       const DISCOUNT_CACHE_KEY_PREFIX = "kaimono-clock-discount-cache-v2";
+      const THEME_KEY = "kaimono-clock-theme";
+
+      function setupThemeControls() {
+        const theme = localStorage.getItem(THEME_KEY) || "cool";
+        document.documentElement.dataset.theme = theme;
+        document.querySelectorAll("[data-theme-select]").forEach((select) => {
+          select.value = theme;
+          select.addEventListener("change", () => {
+            localStorage.setItem(THEME_KEY, select.value);
+            document.documentElement.dataset.theme = select.value;
+            document.querySelectorAll("[data-theme-select]").forEach((other) => {
+              other.value = select.value;
+            });
+          });
+        });
+      }
+
+      function setupSmartAuthPanel() {
+        const panel = document.querySelector("#authPanel");
+        if (!panel) return;
+        let lastY = window.scrollY;
+        let hideTimer = 0;
+
+        const setVisible = (visible) => {
+          panel.classList.toggle("smart-visible", visible);
+          panel.classList.toggle("smart-hidden", !visible);
+        };
+
+        setVisible(true);
+        hideTimer = window.setTimeout(() => {
+          if (window.scrollY > 48 && !panel.matches(":focus-within")) setVisible(false);
+        }, 1800);
+
+        window.addEventListener(
+          "scroll",
+          () => {
+            const currentY = window.scrollY;
+            const goingUp = currentY < lastY - 6;
+            const nearTop = currentY < 36;
+            window.clearTimeout(hideTimer);
+            setVisible(goingUp || nearTop);
+            if (goingUp && !nearTop) {
+              hideTimer = window.setTimeout(() => {
+                if (!panel.matches(":focus-within")) setVisible(false);
+              }, 2200);
+            }
+            lastY = currentY;
+          },
+          { passive: true }
+        );
+      }
+
+      setupThemeControls();
 
       const state = {
         stores: [],
@@ -2375,6 +2627,7 @@
       });
 
       async function initializeApp() {
+        setupSmartAuthPanel();
         restoreSession();
         if (hasSession()) {
           try {

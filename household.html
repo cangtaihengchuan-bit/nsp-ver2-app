@@ -1393,6 +1393,156 @@ h3 {
     .modal-backdrop {
       background: rgba(3, 7, 18, 0.62);
     }
+
+    .theme-control {
+      display: grid;
+      gap: 5px;
+      min-width: 130px;
+    }
+
+    .theme-control span {
+      color: var(--muted);
+      font-size: 0.76rem;
+      font-weight: 900;
+    }
+
+    .theme-control select {
+      min-height: 38px;
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--ink);
+      background: var(--paper);
+      font: inherit;
+      font-weight: 900;
+      padding: 0 10px;
+    }
+
+    html[data-theme="cool"] {
+      color-scheme: dark;
+      --ink: #dce7ef;
+      --muted: #9aa8b4;
+      --line: #303b47;
+      --paper: #151b23;
+      --panel: #1b222c;
+      --mint: #9cdcfe;
+      --mint-dark: #2b6f88;
+      --coral: #75beff;
+      --sun: #7aa7c7;
+      --sky: #86c5df;
+      --lavender: #a8c7df;
+      --green: #7dd3a8;
+      --shadow: 0 18px 44px rgba(0, 0, 0, 0.34);
+    }
+
+    html[data-theme="warm"] {
+      color-scheme: light;
+      --ink: #1e2a2f;
+      --muted: #65737a;
+      --line: #dce6e4;
+      --paper: #fffdf7;
+      --panel: #ffffff;
+      --mint: #1f8f8b;
+      --mint-dark: #126966;
+      --coral: #ff7a59;
+      --sun: #f8c24e;
+      --sky: #72b7f2;
+      --lavender: #9a7bd1;
+      --green: #74b66d;
+      --shadow: 0 16px 34px rgba(30, 42, 47, 0.12);
+    }
+
+    html[data-theme="white-blue"] {
+      color-scheme: light;
+      --ink: #213042;
+      --muted: #5b6f86;
+      --line: #b9d9f0;
+      --paper: #f5fbff;
+      --panel: #ffffff;
+      --mint: #2f9edb;
+      --mint-dark: #226fa4;
+      --coral: #3ba2d8;
+      --sun: #8ccdf2;
+      --sky: #5bb8ee;
+      --lavender: #7abff0;
+      --green: #3aa77d;
+      --shadow: 0 14px 34px rgba(46, 112, 158, 0.16);
+    }
+
+    html[data-theme="cool"] body {
+      background:
+        radial-gradient(circle at 12% 10%, rgba(156, 220, 254, 0.13), transparent 24rem),
+        linear-gradient(180deg, #1e1e1e 0%, #1f252d 48%, #181c22 100%);
+    }
+
+    html[data-theme="warm"] body {
+      background:
+        radial-gradient(circle at 12% 10%, rgba(255, 122, 89, 0.16), transparent 24rem),
+        radial-gradient(circle at 88% 4%, rgba(114, 183, 242, 0.18), transparent 22rem),
+        linear-gradient(180deg, #fff8df 0%, #f3fbf8 46%, #fffdf7 100%);
+    }
+
+    html[data-theme="white-blue"] body {
+      background:
+        radial-gradient(circle at 12% 10%, rgba(91, 184, 238, 0.2), transparent 24rem),
+        linear-gradient(180deg, #ffffff 0%, #eef8ff 46%, #f8fcff 100%);
+    }
+
+    html[data-theme] .top-bar,
+    html[data-theme] .calendar-section,
+    html[data-theme] .entry-panel,
+    html[data-theme] .ledger-section,
+    html[data-theme] .report-section,
+    html[data-theme] .view-tabs,
+    html[data-theme] .experience-nav,
+    html[data-theme] .budget-panel,
+    html[data-theme] .stat-tile,
+    html[data-theme] .day-cell,
+    html[data-theme] .expense-form input,
+    html[data-theme] .expense-form select,
+    html[data-theme] .ghost-button,
+    html[data-theme] .category-budget-input input,
+    html[data-theme] .expense-item,
+    html[data-theme] .modal-tabs,
+    html[data-theme] .empty-state,
+    html[data-theme] .bar-pair,
+    html[data-theme] .saving-stats div,
+    html[data-theme] .ranking-row,
+    html[data-theme] .entry-modal,
+    html[data-theme] .experience-link,
+    html[data-theme] .session-pill,
+    html[data-theme] .icon-button {
+      color: var(--ink);
+      background: color-mix(in srgb, var(--panel) 92%, transparent);
+      border-color: var(--line);
+    }
+
+    html[data-theme] .tab-button.is-active,
+    html[data-theme] .primary-button,
+    html[data-theme] .modal-tab.is-active,
+    html[data-theme] .rank-badge,
+    html[data-theme] .experience-link.primary {
+      color: #fff;
+      background: linear-gradient(135deg, var(--mint-dark), var(--sky));
+    }
+
+    html[data-theme="cool"] .experience-logo {
+      background: linear-gradient(140deg, #2b6f88, #4b8da8);
+    }
+
+    html[data-theme="white-blue"] .experience-logo {
+      background: linear-gradient(140deg, #2f9edb, #5bb8ee);
+    }
+
+    html[data-theme="warm"] .brand-mark {
+      background: #fff8df;
+      border-color: #ffe099;
+    }
+
+    html[data-theme="white-blue"] .brand-mark {
+      background: #eef8ff;
+      border-color: #b9d9f0;
+    }
     </style>
   </head>
   <body>
@@ -1402,6 +1552,14 @@ h3 {
           <span class="experience-logo">K</span>
           <strong>Kaimono Clock</strong>
         </div>
+        <label class="theme-control">
+          <span>カラー</span>
+          <select data-theme-select aria-label="テーマカラー">
+            <option value="warm">暖色</option>
+            <option value="cool">寒色</option>
+            <option value="white-blue">白青</option>
+          </select>
+        </label>
         <div class="experience-links">
           <span id="sessionPill" class="session-pill">未ログイン</span>
           <a class="experience-link" href="./index.html">体験トップ</a>
@@ -1649,7 +1807,25 @@ const incomeCategories = [
 
 const SESSION_KEY = "kaimono-clock-session-v2";
 const DISCOUNT_CACHE_KEY_PREFIX = "kaimono-clock-discount-cache-v2";
+const THEME_KEY = "kaimono-clock-theme";
 const sessionPill = document.querySelector("#sessionPill");
+
+function setupThemeControls() {
+  const theme = localStorage.getItem(THEME_KEY) || "cool";
+  document.documentElement.dataset.theme = theme;
+  document.querySelectorAll("[data-theme-select]").forEach((select) => {
+    select.value = theme;
+    select.addEventListener("change", () => {
+      localStorage.setItem(THEME_KEY, select.value);
+      document.documentElement.dataset.theme = select.value;
+      document.querySelectorAll("[data-theme-select]").forEach((other) => {
+        other.value = select.value;
+      });
+    });
+  });
+}
+
+setupThemeControls();
 
 const yen = new Intl.NumberFormat("ja-JP", {
   style: "currency",
