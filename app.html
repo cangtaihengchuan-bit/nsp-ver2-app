@@ -1948,6 +1948,15 @@
         return Boolean(state.session?.access_token && state.user?.id);
       }
 
+      function maskEmail(email) {
+        const [local, domain] = String(email || "").split("@");
+        if (!local || !domain) return "";
+        const maskedLocal = local.length <= 2
+          ? `${local[0] || ""}**${local.slice(-1) || ""}`
+          : `${local[0]}**${local.slice(-1)}`;
+        return `${maskedLocal}@${domain}`;
+      }
+
       function locationStorageKey() {
         return `${LOCATION_KEY_PREFIX}:${state.user?.id || "guest"}`;
       }
@@ -2128,7 +2137,7 @@
 
       function renderAuth() {
         elements.authPanel.classList.toggle("signed-in", hasSession());
-        elements.authUser.textContent = hasSession() ? state.user.email : "未ログイン";
+        elements.authUser.textContent = hasSession() ? `ログイン中: ${maskEmail(state.user.email)}` : "未ログイン";
         elements.itemForm.querySelector("button[type='submit']").disabled = !hasSession();
         elements.clearAllBtn.disabled = !hasSession();
         elements.locationForm.querySelectorAll("input, button").forEach((control) => {

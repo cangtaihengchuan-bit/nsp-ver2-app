@@ -532,12 +532,21 @@
         renderAuth();
       }
 
+      function maskEmail(email) {
+        const [local, domain] = String(email || "").split("@");
+        if (!local || !domain) return "";
+        const maskedLocal = local.length <= 2
+          ? `${local[0] || ""}**${local.slice(-1) || ""}`
+          : `${local[0]}**${local.slice(-1)}`;
+        return `${maskedLocal}@${domain}`;
+      }
+
       function renderAuth(message = "") {
         const signedIn = Boolean(session?.access_token && session?.user);
         elements.authBox.classList.toggle("signed-in", signedIn);
         elements.authDot.className = `dot ${signedIn ? "ready" : ""}`;
         elements.authStatus.textContent = message || (signedIn ? "ログイン中" : "未ログイン");
-        elements.authUser.textContent = signedIn ? session.user.email : "";
+        elements.authUser.textContent = signedIn ? maskEmail(session.user.email) : "";
       }
 
       async function authRequest(path, body) {

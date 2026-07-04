@@ -1924,6 +1924,15 @@ function setupMobileMenu() {
   });
 }
 
+function maskEmail(email) {
+  const [local, domain] = String(email || "").split("@");
+  if (!local || !domain) return "";
+  const maskedLocal = local.length <= 2
+    ? `${local[0] || ""}**${local.slice(-1) || ""}`
+    : `${local[0]}**${local.slice(-1)}`;
+  return `${maskedLocal}@${domain}`;
+}
+
 setupThemeControls();
 setupMobileMenu();
 
@@ -2023,7 +2032,7 @@ function renderSessionPill() {
   if (!sessionPill) return;
   try {
     const session = JSON.parse(localStorage.getItem(SESSION_KEY) || "null");
-    sessionPill.textContent = session?.user?.email ? `ログイン中: ${session.user.email}` : "未ログイン";
+    sessionPill.textContent = session?.user?.email ? `ログイン中: ${maskEmail(session.user.email)}` : "未ログイン";
   } catch {
     sessionPill.textContent = "未ログイン";
   }
@@ -2261,7 +2270,7 @@ function renderCalendar() {
     const total = sum(dayExpenses);
     const income = sum(dayIncomes);
     const discountLabel = dayDiscounts.length
-      ? `買い時 ${dayDiscounts[0].storeLabel || dayDiscounts[0].storeName || dayDiscounts[0].name}${dayDiscounts.length > 1 ? ` +${dayDiscounts.length - 1}` : ""}`
+      ? `買い時 ${dayDiscounts[0].name || "商品名なし"}${dayDiscounts.length > 1 ? ` +${dayDiscounts.length - 1}` : ""}`
       : "";
     const cell = document.createElement("button");
     cell.type = "button";
