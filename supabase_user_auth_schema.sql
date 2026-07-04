@@ -5,6 +5,8 @@ create table if not exists public.nsp_user_discounts (
   user_id uuid not null references auth.users(id) on delete cascade,
   store_id text not null,
   store_name text not null,
+  store_label text,
+  origin_label text,
   store_type text not null,
   item_name text not null,
   price numeric not null,
@@ -15,6 +17,10 @@ create table if not exists public.nsp_user_discounts (
   note text,
   created_at timestamptz not null default now()
 );
+
+alter table public.nsp_user_discounts
+  add column if not exists store_label text,
+  add column if not exists origin_label text;
 
 create index if not exists nsp_user_discounts_user_created_idx
   on public.nsp_user_discounts (user_id, created_at desc);

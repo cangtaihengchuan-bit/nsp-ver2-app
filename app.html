@@ -389,6 +389,13 @@
         gap: 10px;
       }
 
+      .discount-filter {
+        display: grid;
+        grid-template-columns: minmax(150px, 280px) 1fr;
+        gap: 10px;
+        align-items: end;
+      }
+
       .discount-row {
         min-width: 0;
         display: grid;
@@ -410,6 +417,21 @@
 
       .discount-row span,
       .discount-row small {
+        overflow-wrap: anywhere;
+      }
+
+      .store-label-pill {
+        width: fit-content;
+        max-width: 100%;
+        display: inline-flex;
+        align-items: center;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 4px 9px;
+        color: var(--mint-dark);
+        background: var(--surface-soft);
+        font-size: 0.78rem;
+        font-weight: 900;
         overflow-wrap: anywhere;
       }
 
@@ -626,7 +648,7 @@
 
       .item-form {
         display: grid;
-        grid-template-columns: minmax(170px, 1.1fr) 122px minmax(260px, 1.25fr) minmax(170px, 1fr) auto;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
         gap: 10px;
         align-items: end;
         margin: 18px 0;
@@ -640,6 +662,7 @@
         min-width: 0;
         display: grid;
         gap: 6px;
+        grid-column: span 2;
         margin: 0;
         padding: 0;
         border: 0;
@@ -781,6 +804,12 @@
         .discount-row,
         .item-form {
           grid-template-columns: 1fr;
+        }
+
+        .discount-filter,
+        .sale-field {
+          grid-template-columns: 1fr;
+          grid-column: auto;
         }
 
         .status,
@@ -1519,6 +1548,12 @@
             <h2>保存済み割引一覧</h2>
           </div>
         </div>
+        <label class="discount-filter">
+          <span class="muted">店舗ラベルで絞り込み</span>
+          <select id="discountLabelFilter">
+            <option value="all">すべての店舗ラベル</option>
+          </select>
+        </label>
         <div id="discountList" class="discount-list"></div>
       </section>
 
@@ -1557,6 +1592,10 @@
             </div>
 
             <form id="itemForm" class="item-form">
+              <label>
+                店舗ラベル
+                <input id="storeLabel" type="text" placeholder="店名/検索元地点名" required />
+              </label>
               <label>
                 品物
                 <input id="itemName" type="text" placeholder="例: 牛乳 1L" required />
@@ -1680,6 +1719,7 @@
         stores: [],
         selectedStoreId: "",
         filter: "all",
+        discountLabelFilter: "all",
         userPosition: null,
         notes: {},
         savedLocations: [],
@@ -1743,6 +1783,7 @@
         detailMeta: document.querySelector("#detailMeta"),
         mapBtn: document.querySelector("#mapBtn"),
         itemForm: document.querySelector("#itemForm"),
+        storeLabel: document.querySelector("#storeLabel"),
         itemName: document.querySelector("#itemName"),
         itemPrice: document.querySelector("#itemPrice"),
         saleMode: document.querySelector("#saleMode"),
@@ -1768,6 +1809,7 @@
         locationLon: document.querySelector("#locationLon"),
         saveCurrentLocationBtn: document.querySelector("#saveCurrentLocationBtn"),
         savedLocations: document.querySelector("#savedLocations"),
+        discountLabelFilter: document.querySelector("#discountLabelFilter"),
         discountList: document.querySelector("#discountList"),
       };
 
@@ -1795,6 +1837,24 @@
       function saveDiscountCache() {
         if (!hasSession()) return;
         localStorage.setItem(discountCacheKey(), JSON.stringify(state.notes));
+      }
+
+      function defaultStoreLabel(store, originLabel = state.userPosition?.label || "") {
+        const storeName = store?.name || store?.storeName || "店舗名なし";
+        const origin = originLabel || "検索元未設定";
+        return `${storeName}/${origin}`;
+      }
+
+      function labelForStore(store) {
+        const existing = (state.notes[store?.id] || []).find((note) => note.storeLabel);
+        return existing?.storeLabel || defaultStoreLabel(store);
+      }
+
+      function syncStoreLabelInput() {
+        if (!elements.storeLabel) return;
+        const store = state.stores.find((item) => item.id === state.selectedStoreId);
+        elements.storeLabel.value = store ? labelForStore(store) : "";
+        elements.storeLabel.placeholder = store ? defaultStoreLabel(store) : "店名/検索元地点名";
       }
 
       function loadSavedLocations() {
@@ -1985,6 +2045,8 @@
         return {
           id: row.id,
           storeName: row.store_name,
+          storeLabel: row.store_label || defaultStoreLabel({ name: row.store_name }, row.origin_label || ""),
+          originLabel: row.origin_label || "",
           storeType: row.store_type,
           name: row.item_name,
           price: Number(row.price),
@@ -2003,6 +2065,8 @@
           user_id: state.user.id,
           store_id: storeId,
           store_name: note.storeName,
+          store_label: note.storeLabel || note.storeName,
+          origin_label: note.originLabel || null,
           store_type: note.storeType,
           item_name: note.name,
           price: note.price,
@@ -2012,6 +2076,13 @@
           sale_month_day: note.saleMode === "monthly" ? Number(note.saleMonthDay) : null,
           note: note.note || null,
         };
+      }
+
+      function noteToLegacyRow(storeId, note) {
+        const row = noteToRow(storeId, note);
+        delete row.store_label;
+        delete row.origin_label;
+        return row;
       }
 
       function groupRows(rows) {
@@ -2061,11 +2132,22 @@
       }
 
       async function insertNoteToSupabase(storeId, note) {
-        await supabaseRequest(SUPABASE_TABLE, {
-          method: "POST",
-          headers: { Prefer: "return=minimal" },
-          body: JSON.stringify(noteToRow(storeId, note)),
-        });
+        try {
+          await supabaseRequest(SUPABASE_TABLE, {
+            method: "POST",
+            headers: { Prefer: "return=minimal" },
+            body: JSON.stringify(noteToRow(storeId, note)),
+          });
+          return true;
+        } catch (error) {
+          if (!String(error.message || "").includes("store_label")) throw error;
+          await supabaseRequest(SUPABASE_TABLE, {
+            method: "POST",
+            headers: { Prefer: "return=minimal" },
+            body: JSON.stringify(noteToLegacyRow(storeId, note)),
+          });
+          return false;
+        }
       }
 
       async function deleteNoteFromSupabase(noteId) {
@@ -2294,6 +2376,7 @@
 
       function renderDetail() {
         const store = state.stores.find((item) => item.id === state.selectedStoreId);
+        syncStoreLabelInput();
         if (!store) {
           elements.emptyState.classList.remove("hidden");
           elements.detailView.classList.add("hidden");
@@ -2325,6 +2408,7 @@
             <div class="note-head">
               <div>
                 <h3>${escapeHtml(note.name)}</h3>
+                <span class="store-label-pill">${escapeHtml(note.storeLabel || labelForStore(store))}</span>
                 <p class="muted">${escapeHtml(note.note || "メモなし")}</p>
               </div>
               <div class="price">¥${Number(note.price).toLocaleString("ja-JP")}</div>
@@ -2402,6 +2486,19 @@
           .sort((a, b) => String(b.createdAt || "").localeCompare(String(a.createdAt || ""), "ja"));
       }
 
+      function renderDiscountLabelFilter(rows) {
+        if (!elements.discountLabelFilter) return;
+        const labels = [...new Set(rows.map((note) => note.storeLabel || note.storeName).filter(Boolean))]
+          .sort((a, b) => a.localeCompare(b, "ja"));
+        const current = labels.includes(state.discountLabelFilter) ? state.discountLabelFilter : "all";
+        state.discountLabelFilter = current;
+        elements.discountLabelFilter.innerHTML = [
+          '<option value="all">すべての店舗ラベル</option>',
+          ...labels.map((label) => `<option value="${escapeHtml(label)}">${escapeHtml(label)}</option>`),
+        ].join("");
+        elements.discountLabelFilter.value = current;
+      }
+
       function renderDiscountList() {
         elements.discountList.innerHTML = "";
 
@@ -2410,7 +2507,11 @@
           return;
         }
 
-        const rows = getDiscountRows();
+        const allRows = getDiscountRows();
+        renderDiscountLabelFilter(allRows);
+        const rows = state.discountLabelFilter === "all"
+          ? allRows
+          : allRows.filter((note) => (note.storeLabel || note.storeName) === state.discountLabelFilter);
         if (!rows.length) {
           elements.discountList.innerHTML = '<div class="blank-row">まだ割引情報がありません。店舗を選んで商品・価格・セール日を登録してください。</div>';
           return;
@@ -2423,6 +2524,7 @@
             <div class="discount-main">
               <small class="muted">店舗</small>
               <strong>${escapeHtml(note.storeName || "店舗名なし")}</strong>
+              <span class="store-label-pill">${escapeHtml(note.storeLabel || note.storeName || "ラベル未設定")}</span>
             </div>
             <div class="discount-sub">
               <small class="muted">商品</small>
@@ -2540,6 +2642,11 @@
         });
       });
 
+      elements.discountLabelFilter.addEventListener("change", () => {
+        state.discountLabelFilter = elements.discountLabelFilter.value;
+        renderDiscountList();
+      });
+
       elements.authForm.addEventListener("submit", async (event) => {
         event.preventDefault();
         try {
@@ -2645,6 +2752,8 @@
         const newNote = {
           id: crypto.randomUUID(),
           storeName: store.name,
+          storeLabel: elements.storeLabel.value.trim() || defaultStoreLabel(store),
+          originLabel: state.userPosition?.label || "",
           storeType: store.type,
           name: elements.itemName.value.trim(),
           price: Number(elements.itemPrice.value),
@@ -2665,8 +2774,13 @@
         syncScheduleFields();
         render();
         try {
-          await insertNoteToSupabase(store.id, newNote);
-          setStatus("ready", "Supabaseへ割引情報を保存しました。");
+          const labelsPersisted = await insertNoteToSupabase(store.id, newNote);
+          setStatus(
+            labelsPersisted ? "ready" : "error",
+            labelsPersisted
+              ? "Supabaseへ割引情報を保存しました。"
+              : "割引情報は保存しましたが、店舗ラベル列が未作成のためラベルはDB保存されません。supabase_user_auth_schema.sqlを実行してください。",
+          );
         } catch {
           setStatus("error", "Supabaseへの保存に失敗しました。テーブル作成SQLとRLSポリシーを確認してください。");
         }

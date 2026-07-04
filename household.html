@@ -629,6 +629,8 @@ h3 {
 
 .expense-main {
   min-width: 0;
+  display: grid;
+  gap: 5px;
 }
 
 .expense-main strong {
@@ -640,7 +642,17 @@ h3 {
 
 .expense-main span {
   display: inline-flex;
-  margin-top: 5px;
+}
+
+.record-subline {
+  display: block;
+  min-width: 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 850;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .expense-amount {
@@ -2183,7 +2195,7 @@ function renderCalendar() {
     const total = sum(dayExpenses);
     const income = sum(dayIncomes);
     const discountLabel = dayDiscounts.length
-      ? `買い時 ${dayDiscounts[0].name}${dayDiscounts.length > 1 ? ` +${dayDiscounts.length - 1}` : ""}`
+      ? `買い時 ${dayDiscounts[0].storeLabel || dayDiscounts[0].storeName || dayDiscounts[0].name}${dayDiscounts.length > 1 ? ` +${dayDiscounts.length - 1}` : ""}`
       : "";
     const cell = document.createElement("button");
     cell.type = "button";
@@ -2324,10 +2336,12 @@ function renderModalDayList() {
 function createDiscountRow(item) {
   const row = document.createElement("article");
   row.className = "expense-item compact-record discount-record";
+  const storeLabel = item.storeLabel || item.storeName || "ラベル未設定";
   row.innerHTML = `
     <span class="date-pill">買い時</span>
     <div class="expense-main">
       <strong>${escapeHtml(item.name || "商品名なし")}</strong>
+      <small class="record-subline">${escapeHtml(storeLabel)}</small>
       <span class="category-pill" style="background:#38bdf8">${escapeHtml(item.storeName || "店舗名なし")}</span>
     </div>
     <strong class="expense-amount">${yen.format(Number(item.price || 0))}</strong>
