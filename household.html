@@ -1231,6 +1231,168 @@ h3 {
       }
     }
 
+    :root {
+      color-scheme: dark;
+      --ink: #e7eef6;
+      --muted: #9baabd;
+      --line: #253548;
+      --paper: #07111c;
+      --panel: #101b28;
+      --mint: #2dd4bf;
+      --mint-dark: #0f766e;
+      --coral: #38bdf8;
+      --sun: #818cf8;
+      --sky: #60a5fa;
+      --lavender: #a5b4fc;
+      --green: #22c55e;
+      --shadow: 0 22px 54px rgba(0, 0, 0, 0.38);
+    }
+
+    body {
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 12% 10%, rgba(45, 212, 191, 0.12), transparent 24rem),
+        radial-gradient(circle at 88% 4%, rgba(96, 165, 250, 0.14), transparent 22rem),
+        linear-gradient(180deg, #060b12 0%, #0c1622 48%, #080d14 100%);
+    }
+
+    .top-bar,
+    .calendar-section,
+    .entry-panel,
+    .ledger-section,
+    .report-section,
+    .view-tabs,
+    .experience-nav,
+    .budget-panel,
+    .stat-tile,
+    .day-cell,
+    .expense-form input,
+    .expense-form select,
+    .ghost-button,
+    .category-budget-input input,
+    .expense-item,
+    .modal-tabs,
+    .empty-state,
+    .bar-pair,
+    .saving-stats div,
+    .ranking-row,
+    .entry-modal,
+    .experience-link,
+    .session-pill,
+    .icon-button {
+      color: var(--ink);
+      background: rgba(12, 22, 34, 0.9);
+      border-color: rgba(83, 104, 128, 0.62);
+      box-shadow: var(--shadow);
+    }
+
+    .brand-mark {
+      background: rgba(15, 26, 38, 0.94);
+      border-color: var(--line);
+    }
+
+    .experience-logo {
+      background: linear-gradient(140deg, #14b8a6, #2563eb);
+    }
+
+    .eyebrow,
+    .budget-input,
+    .remaining strong,
+    .day-total,
+    .date-pill,
+    .saving-stats strong {
+      color: #2dd4bf;
+    }
+
+    .budget-panel label,
+    .stat-tile span,
+    .weekday-row,
+    .expense-form label,
+    .summary-head span,
+    .category-budget-input,
+    .category-budget-status,
+    .report-note,
+    .month-bar span,
+    .saving-stats span,
+    .ranking-main span,
+    .session-pill {
+      color: var(--muted);
+    }
+
+    .budget-input input {
+      color: var(--ink);
+    }
+
+    .tab-button.is-active,
+    .primary-button,
+    .modal-tab.is-active,
+    .rank-badge,
+    .experience-link.primary {
+      color: #f8fbff;
+      background: linear-gradient(135deg, #0f766e, #1d4ed8);
+    }
+
+    .secondary-button {
+      color: #f8fbff;
+      background: #0f766e;
+    }
+
+    .primary-button:hover,
+    .secondary-button:hover {
+      background: #2563eb;
+    }
+
+    .day-cell.empty {
+      background: rgba(15, 26, 38, 0.48);
+    }
+
+    .day-cell.is-today,
+    .day-cell.is-selected,
+    .day-cell:not(.empty):hover,
+    .icon-button:hover,
+    .ghost-button:hover {
+      border-color: var(--mint);
+    }
+
+    .day-cell.is-selected,
+    .expense-form input:focus,
+    .expense-form select:focus {
+      box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.16);
+      outline-color: rgba(45, 212, 191, 0.16);
+    }
+
+    .discount-chip,
+    .discount-record .expense-amount,
+    .category-budget-status.is-over,
+    .remaining.is-over strong,
+    .delete-button {
+      color: #7dd3fc;
+    }
+
+    .discount-record,
+    .budget-alert {
+      background: rgba(56, 189, 248, 0.12);
+      border-color: rgba(56, 189, 248, 0.32);
+      color: #bae6fd;
+    }
+
+    .bar-track,
+    .saving-track {
+      background: #152235;
+    }
+
+    .date-pill {
+      background: rgba(45, 212, 191, 0.13);
+    }
+
+    .delete-button {
+      background: rgba(15, 26, 38, 0.9);
+      border-color: var(--line);
+    }
+
+    .modal-backdrop {
+      background: rgba(3, 7, 18, 0.62);
+    }
     </style>
   </head>
   <body>
@@ -1251,11 +1413,11 @@ h3 {
         <div class="brand-block">
           <div class="brand-mark" aria-hidden="true">
             <svg viewBox="0 0 64 64" role="img">
-              <path d="M13 22c0-5 4-9 9-9h21c5 0 9 4 9 9v25c0 5-4 9-9 9H22c-5 0-9-4-9-9V22z" fill="#fff4bf"/>
-              <path d="M18 23c0-3 2-5 5-5h20c3 0 5 2 5 5v23c0 3-2 5-5 5H23c-3 0-5-2-5-5V23z" fill="#1f8f8b"/>
-              <path d="M22 27h22v5H22v-5zm0 10h10v10H22V37zm14 0h8v3h-8v-3zm0 7h8v3h-8v-3z" fill="#fff8df"/>
-              <path d="M16 13c3 0 7 2 8 6-5 1-9-1-8-6z" fill="#ff7a59"/>
-              <path d="M43 12c-4 1-6 4-5 8 5-1 7-4 5-8z" fill="#f8c24e"/>
+              <path d="M13 22c0-5 4-9 9-9h21c5 0 9 4 9 9v25c0 5-4 9-9 9H22c-5 0-9-4-9-9V22z" fill="#132238"/>
+              <path d="M18 23c0-3 2-5 5-5h20c3 0 5 2 5 5v23c0 3-2 5-5 5H23c-3 0-5-2-5-5V23z" fill="#0f766e"/>
+              <path d="M22 27h22v5H22v-5zm0 10h10v10H22V37zm14 0h8v3h-8v-3zm0 7h8v3h-8v-3z" fill="#e7eef6"/>
+              <path d="M16 13c3 0 7 2 8 6-5 1-9-1-8-6z" fill="#38bdf8"/>
+              <path d="M43 12c-4 1-6 4-5 8 5-1 7-4 5-8z" fill="#818cf8"/>
             </svg>
           </div>
           <div>
@@ -1461,10 +1623,10 @@ h3 {
     <template id="emptyTemplate">
       <div class="empty-state">
         <svg viewBox="0 0 120 80" aria-hidden="true">
-          <rect x="18" y="19" width="84" height="48" rx="8" fill="#fff4bf"/>
-          <path d="M30 33h60M30 45h34M30 56h48" stroke="#1f8f8b" stroke-width="6" stroke-linecap="round"/>
-          <circle cx="91" cy="22" r="14" fill="#ff7a59"/>
-          <path d="M85 22h12M91 16v12" stroke="#fff8df" stroke-width="4" stroke-linecap="round"/>
+          <rect x="18" y="19" width="84" height="48" rx="8" fill="#132238"/>
+          <path d="M30 33h60M30 45h34M30 56h48" stroke="#2dd4bf" stroke-width="6" stroke-linecap="round"/>
+          <circle cx="91" cy="22" r="14" fill="#38bdf8"/>
+          <path d="M85 22h12M91 16v12" stroke="#e7eef6" stroke-width="4" stroke-linecap="round"/>
         </svg>
         <p>この月の記録はまだありません。</p>
       </div>
@@ -1472,17 +1634,17 @@ h3 {
     <script>
 const categories = [
   { id: "food", label: "食料品", color: "#1f8f8b" },
-  { id: "daily", label: "日用品", color: "#ff7a59" },
+  { id: "daily", label: "日用品", color: "#60a5fa" },
   { id: "transport", label: "交通", color: "#72b7f2" },
   { id: "study", label: "学習", color: "#9a7bd1" },
-  { id: "fashion", label: "服・美容", color: "#f8c24e" },
-  { id: "fun", label: "遊び", color: "#74b66d" },
+  { id: "fashion", label: "服・美容", color: "#818cf8" },
+  { id: "fun", label: "遊び", color: "#22c55e" },
   { id: "other", label: "その他", color: "#6b7780" }
 ];
 
 const incomeCategories = [
   { id: "allowance", label: "お小遣い", color: "#1f8f8b" },
-  { id: "salary", label: "給与", color: "#74b66d" }
+  { id: "salary", label: "給与", color: "#22c55e" }
 ];
 
 const SESSION_KEY = "kaimono-clock-session-v2";
@@ -1968,7 +2130,7 @@ function createDiscountRow(item) {
     <span class="date-pill">買い時</span>
     <div class="expense-main">
       <strong>${escapeHtml(item.name || "商品名なし")}</strong>
-      <span class="category-pill" style="background:#ff7a59">${escapeHtml(item.storeName || "店舗名なし")}</span>
+      <span class="category-pill" style="background:#38bdf8">${escapeHtml(item.storeName || "店舗名なし")}</span>
     </div>
     <strong class="expense-amount">${yen.format(Number(item.price || 0))}</strong>
   `;

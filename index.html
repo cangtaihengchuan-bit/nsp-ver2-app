@@ -242,6 +242,57 @@
           font-size: clamp(2rem, 13vw, 3.1rem);
         }
       }
+      :root {
+        color-scheme: dark;
+        --ink: #e6eef3;
+        --muted: #9fb0bd;
+        --line: #233241;
+        --mint: #38d3c5;
+        --mint-dark: #0b1720;
+        --coral: #60a5fa;
+        --paper: #111b26;
+        --shadow: 0 22px 54px rgba(0, 0, 0, 0.42);
+      }
+
+      body {
+        background:
+          radial-gradient(circle at 18% 12%, rgba(56, 211, 197, 0.14), transparent 24rem),
+          radial-gradient(circle at 88% 8%, rgba(96, 165, 250, 0.16), transparent 22rem),
+          linear-gradient(180deg, #060b12 0%, #0c1622 55%, #080d14 100%);
+      }
+
+      main,
+      .auth-box {
+        border-color: rgba(71, 91, 112, 0.72);
+        background: rgba(11, 20, 30, 0.88);
+      }
+
+      .logo {
+        background: linear-gradient(140deg, #38d3c5, #2563eb);
+      }
+
+      input {
+        color: var(--ink);
+        background: #0f1a26;
+        border-color: var(--line);
+      }
+
+      button,
+      a.primary {
+        color: #f8fbff;
+        background: linear-gradient(135deg, #0f766e, #1d4ed8);
+      }
+
+      a,
+      .logout-btn {
+        color: var(--ink);
+        background: #101a25;
+        border-color: var(--line);
+      }
+
+      .dot {
+        background: #526272;
+      }
     </style>
   </head>
   <body>

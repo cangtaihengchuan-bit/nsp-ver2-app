@@ -1024,6 +1024,149 @@
           padding: 12px;
         }
       }
+      :root {
+        color-scheme: dark;
+        --ink: #e7eef6;
+        --muted: #9baabd;
+        --paper: #07111c;
+        --surface: #101b28;
+        --surface-soft: #0c1622;
+        --line: #253548;
+        --mint: #2dd4bf;
+        --mint-dark: #0f766e;
+        --sky: #60a5fa;
+        --coral: #38bdf8;
+        --lemon: #818cf8;
+        --navy: #050b13;
+        --shadow: 0 22px 54px rgba(0, 0, 0, 0.38);
+      }
+
+      body {
+        color: var(--ink);
+        background:
+          linear-gradient(135deg, rgba(5, 11, 19, 0.96) 0%, rgba(11, 23, 35, 0.95) 48%, rgba(6, 12, 20, 0.98) 100%),
+          url("https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=2200&q=78") center / cover fixed;
+      }
+
+      .hero,
+      .status,
+      .auth-panel,
+      .location-panel,
+      .discount-overview,
+      .stores,
+      .workspace,
+      .metric-card,
+      .note-card,
+      .proof-list div,
+      .hero-controls,
+      .saved-location-card,
+      .discount-row,
+      .store-card,
+      .item-form,
+      .blank-row {
+        border-color: rgba(83, 104, 128, 0.62);
+        background: rgba(12, 22, 34, 0.9);
+        box-shadow: var(--shadow);
+      }
+
+      .brand,
+      h1,
+      .proof-list dt,
+      .metric-card strong {
+        color: #f2f7fb;
+      }
+
+      .brand-mark {
+        background: linear-gradient(140deg, #14b8a6, #2563eb);
+      }
+
+      .lead,
+      label,
+      .status,
+      .store-card small,
+      .muted,
+      .note-meta span,
+      .auth-copy p,
+      .proof-list dd {
+        color: var(--muted);
+      }
+
+      select,
+      input,
+      textarea {
+        color: var(--ink);
+        background: #0a1420;
+        border-color: var(--line);
+      }
+
+      select:focus,
+      input:focus,
+      textarea:focus {
+        border-color: var(--mint);
+        box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.16);
+      }
+
+      .btn-primary,
+      .view-tab.active {
+        color: #f8fbff;
+        background: linear-gradient(135deg, #0f766e, #1d4ed8);
+        box-shadow: 0 14px 30px rgba(37, 99, 235, 0.24);
+      }
+
+      .btn-primary:hover {
+        background: linear-gradient(135deg, #0d9488, #2563eb);
+      }
+
+      .btn-ghost,
+      .chip,
+      .view-switch,
+      .back-link {
+        color: var(--ink);
+        background: rgba(15, 26, 38, 0.92);
+        border-color: var(--line);
+      }
+
+      .student-modes span,
+      .chip.active,
+      .type-pill,
+      .note-meta span {
+        color: #bfefff;
+        background: rgba(56, 189, 248, 0.13);
+        border-color: rgba(56, 189, 248, 0.28);
+      }
+
+      .type-pill.drugstore {
+        color: #c7d2fe;
+        background: rgba(129, 140, 248, 0.15);
+      }
+
+      .discount-price,
+      .price,
+      .auth-user {
+        color: #7dd3fc;
+      }
+
+      .delete-btn {
+        color: #fecaca;
+        background: rgba(127, 29, 29, 0.28);
+        border-color: rgba(248, 113, 113, 0.35);
+      }
+
+      .dot {
+        background: #526272;
+      }
+
+      .dot.ready {
+        background: var(--mint);
+      }
+
+      .dot.loading {
+        background: var(--lemon);
+      }
+
+      .dot.error {
+        background: #38bdf8;
+      }
     </style>
   </head>
   <body>
