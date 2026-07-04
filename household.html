@@ -1157,6 +1157,9 @@ h3 {
 
 
     .experience-nav {
+      position: sticky;
+      top: 0;
+      z-index: 20;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -1227,8 +1230,52 @@ h3 {
       background: #142c2c;
     }
 
+    .mobile-menu-btn {
+      display: none;
+    }
+
     @media (max-width: 640px) {
-      .experience-nav,
+      .mobile-menu-btn {
+        position: sticky;
+        top: 8px;
+        z-index: 35;
+        display: grid;
+        width: 44px;
+        height: 44px;
+        place-items: center;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        color: var(--ink);
+        background: var(--panel);
+        box-shadow: var(--shadow);
+        font-size: 1.35rem;
+        font-weight: 950;
+      }
+
+      .experience-nav {
+        position: fixed;
+        inset: 0 auto 0 0;
+        z-index: 40;
+        width: min(86vw, 340px);
+        height: 100dvh;
+        overflow: auto;
+        display: grid;
+        grid-template-columns: 1fr;
+        align-content: start;
+        align-items: stretch;
+        margin: 0;
+        padding: 16px;
+        border-radius: 0 8px 8px 0;
+        transform: translateX(-105%);
+        transition: transform 180ms ease;
+      }
+
+      .experience-nav.menu-open,
+      .experience-nav:focus-within {
+        transform: translateX(0);
+      }
+
+      .experience-brand,
       .experience-links {
         align-items: stretch;
         flex-direction: column;
@@ -1581,7 +1628,8 @@ h3 {
   </head>
   <body>
     <div class="app-shell">
-      <nav class="experience-nav" aria-label="アプリ体験ナビゲーション">
+      <button id="menuToggle" class="mobile-menu-btn" type="button" aria-controls="experienceNav" aria-expanded="false">☰</button>
+      <nav id="experienceNav" class="experience-nav" aria-label="アプリ体験ナビゲーション">
         <div class="experience-brand">
           <span class="experience-logo">K</span>
           <strong>Kaimono Clock</strong>
@@ -1859,7 +1907,25 @@ function setupThemeControls() {
   });
 }
 
+function setupMobileMenu() {
+  const nav = document.querySelector("#experienceNav");
+  const toggle = document.querySelector("#menuToggle");
+  if (!nav || !toggle) return;
+  const setOpen = (open) => {
+    nav.classList.toggle("menu-open", open);
+    toggle.setAttribute("aria-expanded", String(open));
+  };
+  toggle.addEventListener("click", () => setOpen(!nav.classList.contains("menu-open")));
+  nav.querySelectorAll("a").forEach((link) => {
+    link.addEventListener("click", () => setOpen(false));
+  });
+  window.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") setOpen(false);
+  });
+}
+
 setupThemeControls();
+setupMobileMenu();
 
 const yen = new Intl.NumberFormat("ja-JP", {
   style: "currency",
