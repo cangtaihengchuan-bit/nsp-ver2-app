@@ -2292,7 +2292,8 @@
         }
         const rows = await supabaseRequest(`${SUPABASE_TABLE}?select=*&order=created_at.desc`);
         state.notes = groupRows(rows || []);
-        saveDiscountCache();
+        const purged = await purgeExpiredOneTimeNotes();
+        if (!purged) saveDiscountCache();
         setStatus("ready", "Supabaseから保存済みの割引情報を読み込みました。");
       }
 
@@ -2342,6 +2343,63 @@
           method: "DELETE",
           headers: { Prefer: "return=minimal" },
         });
+      }
+
+      function removeNoteFromLocal(storeId, noteId) {
+        const allNotes = loadNotes();
+        allNotes[storeId] = (allNotes[storeId] || []).filter((item) => item.id !== noteId);
+        if (!allNotes[storeId].length) delete allNotes[storeId];
+        state.notes = allNotes;
+        saveDiscountCache();
+      }
+
+      async function deleteNoteEverywhere(storeId, noteId, { renderAfter = true } = {}) {
+        removeNoteFromLocal(storeId, noteId);
+        if (renderAfter) render();
+        try {
+          await deleteNoteFromSupabase(noteId);
+          setStatus("ready", "割引情報を削除しました。");
+        } catch {
+          setStatus("error", "Supabaseからの削除に失敗しました。テーブル権限を確認してください。");
+        }
+      }
+
+      function parseDateOnly(value) {
+        const match = String(value || "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+        if (!match) return null;
+        const date = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+        date.setHours(0, 0, 0, 0);
+        return date;
+      }
+
+      function isExpiredOneTimeNote(note) {
+        if ((note.saleMode || "once") !== "once") return false;
+        const saleDate = parseDateOnly(note.saleDate);
+        if (!saleDate) return false;
+        const threshold = new Date();
+        threshold.setHours(0, 0, 0, 0);
+        threshold.setDate(threshold.getDate() - 7);
+        return saleDate <= threshold;
+      }
+
+      async function purgeExpiredOneTimeNotes() {
+        if (!hasSession()) return 0;
+        const expired = getDiscountRows().filter(isExpiredOneTimeNote);
+        if (!expired.length) return 0;
+
+        const expiredIds = new Set(expired.map((note) => note.id));
+        const allNotes = loadNotes();
+        Object.keys(allNotes).forEach((storeId) => {
+          allNotes[storeId] = (allNotes[storeId] || []).filter((note) => !expiredIds.has(note.id));
+          if (!allNotes[storeId].length) delete allNotes[storeId];
+        });
+        state.notes = allNotes;
+        saveDiscountCache();
+
+        for (const note of expired) {
+          await deleteNoteFromSupabase(note.id).catch(() => null);
+        }
+        return expired.length;
       }
 
       async function updateStoreLabelInSupabase(storeId, storeLabel) {
@@ -2740,8 +2798,12 @@
               <small class="muted">買い時</small>
               <span>${escapeHtml(describeSaleSchedule(note))}</span>
               ${note.note ? `<small>${escapeHtml(note.note)}</small>` : ""}
+              <button class="delete-btn" type="button" data-action="delete-discount">削除</button>
             </div>
           `;
+          row.querySelector('[data-action="delete-discount"]').addEventListener("click", async () => {
+            await deleteNoteEverywhere(note.storeId, note.id);
+          });
           row.querySelector(".label-edit-form").addEventListener("submit", async (event) => {
             event.preventDefault();
             const form = event.currentTarget;
