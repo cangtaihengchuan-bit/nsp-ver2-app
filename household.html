@@ -1437,19 +1437,19 @@ h3 {
 
     html[data-theme="warm"] {
       color-scheme: light;
-      --ink: #1e2a2f;
-      --muted: #65737a;
-      --line: #dce6e4;
-      --paper: #fffdf7;
-      --panel: #ffffff;
-      --mint: #1f8f8b;
-      --mint-dark: #126966;
-      --coral: #ff7a59;
-      --sun: #f8c24e;
-      --sky: #72b7f2;
-      --lavender: #9a7bd1;
-      --green: #74b66d;
-      --shadow: 0 16px 34px rgba(30, 42, 47, 0.12);
+      --ink: #24332f;
+      --muted: #687a75;
+      --line: #f0d7ca;
+      --paper: #fff4e8;
+      --panel: #fffdf8;
+      --mint: #35b6a6;
+      --mint-dark: #ff8a6b;
+      --coral: #ff8a6b;
+      --sun: #ffd166;
+      --sky: #ffb36b;
+      --lavender: #b79be8;
+      --green: #35b681;
+      --shadow: 0 16px 34px rgba(181, 94, 65, 0.14);
     }
 
     html[data-theme="white-blue"] {
@@ -1477,9 +1477,9 @@ h3 {
 
     html[data-theme="warm"] body {
       background:
-        radial-gradient(circle at 12% 10%, rgba(255, 122, 89, 0.16), transparent 24rem),
-        radial-gradient(circle at 88% 4%, rgba(114, 183, 242, 0.18), transparent 22rem),
-        linear-gradient(180deg, #fff8df 0%, #f3fbf8 46%, #fffdf7 100%);
+        radial-gradient(circle at 12% 10%, rgba(255, 138, 107, 0.18), transparent 24rem),
+        radial-gradient(circle at 88% 4%, rgba(53, 182, 166, 0.14), transparent 22rem),
+        linear-gradient(180deg, #fff4e8 0%, #fffdf8 48%, #f5fbf8 100%);
     }
 
     html[data-theme="white-blue"] body {
@@ -1535,13 +1535,25 @@ h3 {
     }
 
     html[data-theme="warm"] .brand-mark {
-      background: #fff8df;
-      border-color: #ffe099;
+      background: #fff0e5;
+      border-color: #ffd7c2;
     }
 
     html[data-theme="white-blue"] .brand-mark {
       background: #eef8ff;
       border-color: #b9d9f0;
+    }
+
+    html[data-theme="warm"] .experience-logo {
+      background: linear-gradient(140deg, #35b6a6, #ff8a6b 72%, #ffb36b);
+    }
+
+    html[data-theme="warm"] .tab-button.is-active,
+    html[data-theme="warm"] .primary-button,
+    html[data-theme="warm"] .modal-tab.is-active,
+    html[data-theme="warm"] .rank-badge,
+    html[data-theme="warm"] .experience-link.primary {
+      background: linear-gradient(135deg, #ff8a6b, #ffb36b);
     }
     </style>
   </head>
